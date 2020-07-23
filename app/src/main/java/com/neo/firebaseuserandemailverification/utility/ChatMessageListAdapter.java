@@ -67,8 +67,9 @@ public class ChatMessageListAdapter extends ArrayAdapter<ChatMessage> {
         try{
             //set the message
             holder.message.setText(getItem(position).getMessage());
-
-            Picasso.get().load(getItem(position).getProfile_image()).into(holder.mProfileImage);
+            if(!getItem(position).getProfile_image().equals("")){
+                Picasso.get().load(getItem(position).getProfile_image()).into(holder.mProfileImage);
+            }
             holder.name.setText(getItem(position).getName());
 
 
