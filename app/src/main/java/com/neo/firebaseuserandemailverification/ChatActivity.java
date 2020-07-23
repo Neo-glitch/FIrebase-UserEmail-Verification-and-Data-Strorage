@@ -66,6 +66,9 @@ public class ChatActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * sends chatRoom list to chatRoomListAdapter
+     */
     private void setupChatroomList(){
         Log.d(TAG, "setupChatroomList: setting up chatroom listview");
         mAdapter = new ChatroomListAdapter(ChatActivity.this, R.layout.layout_chatroom_listitem, mChatrooms);
@@ -82,6 +85,9 @@ public class ChatActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * gets list of chatRooms from the firebase Database
+     */
     private void getChatrooms(){
         Log.d(TAG, "getChatrooms: retrieving chatrooms from firebase database.");
         mChatrooms = new ArrayList<>();
@@ -98,6 +104,7 @@ public class ChatActivity extends AppCompatActivity {
                     Chatroom chatroom = new Chatroom();
                     Map<String, Object> objectMap = (HashMap<String, Object>) singleSnapshot.getValue();
 
+                    // gets the needed field from each snapShot(i.e each chatRoom in node) and assign to chatRoom object
                     chatroom.setChatroom_id(objectMap.get(getString(R.string.field_chatroom_id)).toString());
                     chatroom.setChatroom_name(objectMap.get(getString(R.string.field_chatroom_name)).toString());
                     chatroom.setCreator_id(objectMap.get(getString(R.string.field_creator_id)).toString());
@@ -109,7 +116,7 @@ public class ChatActivity extends AppCompatActivity {
 //                    chatroom.setCreator_id(singleSnapshot.getValue(Chatroom.class).getCreator_id());
 //                    chatroom.setChatroom_name(singleSnapshot.getValue(Chatroom.class).getChatroom_name());
 
-                    //get the chatrooms messages
+                    //get the chatrooms messages, by looping though messages inside the chatRoom messages node
                     ArrayList<ChatMessage> messagesList = new ArrayList<ChatMessage>();
                     for(DataSnapshot snapshot: singleSnapshot
                             .child(getString(R.string.field_chatroom_messages)).getChildren()){
@@ -119,8 +126,8 @@ public class ChatActivity extends AppCompatActivity {
                         message.setMessage(snapshot.getValue(ChatMessage.class).getMessage());
                         messagesList.add(message);
                     }
-                    chatroom.setChatroom_messages(messagesList);
-                    mChatrooms.add(chatroom);
+                    chatroom.setChatroom_messages(messagesList);            // sets the msg to the chatRoom obj
+                    mChatrooms.add(chatroom);                               // add chatRoom obj to list of chatRooms
                 }
                 setupChatroomList();
             }

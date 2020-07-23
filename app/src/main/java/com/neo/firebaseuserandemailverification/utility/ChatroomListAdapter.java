@@ -35,7 +35,6 @@ import java.util.List;
  */
 
 public class ChatroomListAdapter extends ArrayAdapter<Chatroom> {
-
     private static final String TAG = "ChatroomListAdapter";
 
     private int mLayoutResource;
@@ -82,7 +81,7 @@ public class ChatroomListAdapter extends ArrayAdapter<Chatroom> {
                     + " messages";
             holder.numberMessages.setText(chatMessagesString);
 
-            //get the users details who created the chatroom
+            //get the users details who created the chatroom via the creatorId(userId)
             DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
             Query query = reference.child(mContext.getString(R.string.dbnode_users))
                     .orderByKey()

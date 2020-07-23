@@ -36,6 +36,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
+/**
+ * handles inserting new chatRoom messages
+ */
 public class ChatroomActivity extends AppCompatActivity {
 
     private static final String TAG = "ChatroomActivity";
@@ -52,7 +55,7 @@ public class ChatroomActivity extends AppCompatActivity {
 
     //vars
     private Chatroom mChatroom;
-    private List<ChatMessage> mMessagesList;
+    private List<ChatMessage> mMessagesList;                            // list of messages in chatRoom
     private ChatMessageListAdapter mAdapter;
 
 
@@ -103,7 +106,7 @@ public class ChatroomActivity extends AppCompatActivity {
                             .child(mChatroom.getChatroom_id())
                             .child(getString(R.string.field_chatroom_messages));
 
-                    //create the new messages id
+                    //create the new messages id and get the key
                     String newMessageId = reference.push().getKey();
 
                     //insert the new message into the chatroom
@@ -129,7 +132,7 @@ public class ChatroomActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         if (intent.hasExtra(getString(R.string.intent_chatroom))) {
-            Chatroom chatroom = intent.getParcelableExtra(getString(R.string.intent_chatroom));
+            Chatroom chatroom = intent.getParcelableExtra(getString(R.string.intent_chatroom));       // gets the chatRoom object
             Log.d(TAG, "getChatroom: chatroom: " + chatroom.toString());
             mChatroom = chatroom;
             mChatroomName.setText(mChatroom.getChatroom_name());
@@ -139,6 +142,9 @@ public class ChatroomActivity extends AppCompatActivity {
     }
 
 
+    /**
+     * retrieves the list of messages from a chatRoom and send to the listAdapter
+     */
     private void getChatroomMessages() {
         mMessagesList = new ArrayList<>();
         if (mMessagesList.size() > 0) {
@@ -192,12 +198,17 @@ public class ChatroomActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * gets user details associated with a message
+     */
     private void getUserDetails() {
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
         for (int i = 0; i < mMessagesList.size(); i++) {
             Log.d(TAG, "onDataChange: searching for userId: " + mMessagesList.get(i).getUser_id());
             final int j = i;
-            if (mMessagesList.get(i).getUser_id() != null) {
+            if (mMessagesList.get(i).getUser_id() != null) {  // avoids getting welcome msg
+
+                // queries user node that has same uid as that of the msg in focus
                 Query query = reference.child(getString(R.string.dbnode_users))
                         .orderByKey()
                         .equalTo(mMessagesList.get(i).getUser_id());
@@ -223,6 +234,9 @@ public class ChatroomActivity extends AppCompatActivity {
     }
 
 
+    /**
+     * passes messageList to the ListAdapter
+     */
     private void initMessagesList() {
         mAdapter = new ChatMessageListAdapter(ChatroomActivity.this,
                 R.layout.layout_chatmessage_listitem, mMessagesList);
@@ -301,6 +315,7 @@ public class ChatroomActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        // needed to avoid memLeaks since will keep listening after leaving the activity
         mMessagesReference.removeEventListener(mValueEventListener);
     }
 

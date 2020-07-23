@@ -37,31 +37,7 @@ public class SignedInActivity extends AppCompatActivity {
 
     }
 
-//    /**
-//     * used to set displayName(userName) and photoUri
-//     */
-//    private void setUserDetails(){
-//       FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-//       if(user != null){
-//           UserProfileChangeRequest profileChangeRequest = new UserProfileChangeRequest.Builder()
-//                   .setDisplayName("Neo")
-//                   .setPhotoUri(Uri.parse("https://tr4.cbsistatic.com/hub/i/r/2020/02/24/0c40ec8f-8ebf-4f28-9e2b-5f09d977ce97/resize/1200x/077bf649cbb059fc9662f3b4e6943120")
-//                   .buildUpon()
-//                   .appendPath("android11hero.jpg").build())
-//                   .build();
-//
-//           user.updateProfile(profileChangeRequest).addOnCompleteListener(new OnCompleteListener<Void>() {  // updates details on firebase
-//               @Override
-//               public void onComplete(@NonNull Task<Void> task) {
-//                   if(task.isSuccessful()){
-//                        getUserDetails();
-//                   }
-//               }
-//           });
-//
-//       }
-//    }
-//
+
     /**
      * gets user acct details
      */
@@ -126,6 +102,9 @@ public class SignedInActivity extends AppCompatActivity {
                 return true;
             case R.id.optionAccountSettings:
                 startActivity(new Intent(SignedInActivity.this, SettingsActivity.class));
+                return true;
+            case R.id.optionChat:
+                startActivity(new Intent(SignedInActivity.this, ChatActivity.class));
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

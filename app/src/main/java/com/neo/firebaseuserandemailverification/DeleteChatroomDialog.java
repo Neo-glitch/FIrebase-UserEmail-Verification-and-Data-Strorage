@@ -32,7 +32,7 @@ public class DeleteChatroomDialog extends DialogFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d(TAG, "onCreate: started");
-        mChatroomId = getArguments().getString(getString(R.string.field_chatroom_id));
+        mChatroomId = getArguments().getString(getString(R.string.field_chatroom_id));      // gets the chatRoomId passed to be deleted
         if(mChatroomId != null){
             Log.d(TAG, "onCreate: got the chatroom id: " + mChatroomId);
         }
