@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -14,8 +15,22 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.neo.firebaseuserandemailverification.models.User;
+import com.neo.firebaseuserandemailverification.utility.UniversalImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoader;
 import com.squareup.picasso.Picasso;
 
+
+/**
+ * activity shown when user has been authenticated successfully
+ */
 public class SignedInActivity extends AppCompatActivity {
 
     private static final String TAG = "SignedInActivity";
@@ -24,6 +39,10 @@ public class SignedInActivity extends AppCompatActivity {
     private FirebaseAuth.AuthStateListener mAuthListener;
 
     // widgets and UI References
+
+    //vars
+    public static boolean isActivityRunning;
+    private Boolean mIsAdmin = false;
 
 
 
@@ -34,7 +53,67 @@ public class SignedInActivity extends AppCompatActivity {
         Log.d(TAG, "onCreate: started.");
         setupFirebaseAuth();
         getUserDetails();
+        initFCM();
+        isAdmin();
+//        initImageLoader();
 
+    }
+
+    private void initFCM(){
+        String token = FirebaseInstanceId.getInstance().getToken();
+        Log.d(TAG, "initFCM: token: " + token);
+        sendRegistrationToServer(token);
+    }
+
+    /**
+     * done here also since when user signs in the token will be refreshed for sure
+     * and send token to firebase db
+     */
+    private void sendRegistrationToServer(String refreshedToken) {
+        Log.d(TAG, "sendRegistrationToServer: sending token to server: " + refreshedToken);
+
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
+
+        reference.child(getString(R.string.dbnode_users))
+                .child(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                .child(getString(R.string.field_messaging_token))                       // field to store the token
+                .setValue(refreshedToken);
+    }
+
+
+    /**
+     * checks to see if user security level is = 10 i.e admin
+     */
+    private void isAdmin(){
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
+        Query query = reference.child(getString(R.string.dbnode_users))
+                .orderByChild(getString(R.string.field_user_id))
+                .equalTo(FirebaseAuth.getInstance().getCurrentUser().getUid());
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.d(TAG, "onDataChange: datasnapshot: " + dataSnapshot);
+                DataSnapshot singleSnapshot = dataSnapshot.getChildren().iterator().next();
+                int securityLevel = Integer.parseInt(singleSnapshot.getValue(User.class).getSecurity_level());
+                if( securityLevel == 10){
+                    Log.d(TAG, "onDataChange: user is an admin.");
+                    mIsAdmin = true;
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    /**
+     * init universal image loader although not used
+     */
+    private void initImageLoader(){
+        UniversalImageLoader imageLoader = new UniversalImageLoader(SignedInActivity.this);
+        ImageLoader.getInstance().init(imageLoader.getConfig());
     }
 
 
@@ -105,6 +184,13 @@ public class SignedInActivity extends AppCompatActivity {
                 return true;
             case R.id.optionChat:
                 startActivity(new Intent(SignedInActivity.this, ChatActivity.class));
+                return true;
+            case R.id.optionAdmin:
+                if(mIsAdmin){
+                    startActivity(new Intent(SignedInActivity.this, AdminActivity.class));
+                }else{
+                    Toast.makeText(this, "You're not an Admin", Toast.LENGTH_SHORT).show();
+                }
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

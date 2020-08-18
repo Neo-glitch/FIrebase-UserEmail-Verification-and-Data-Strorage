@@ -31,7 +31,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginBottom="40dp"
-            android:layout_below="@+id/toolbar">
+            android:layout_below="@+id/toolbar"
+            >
 
             <ListView
                 android:layout_width="match_parent"
@@ -39,7 +40,9 @@
                 android:id="@+id/listView"
                 android:layout_marginTop="10dp"
                 android:background="@null"
-                android:divider="@null">
+                android:divider="@null"
+                android:stackFromBottom="true"
+                android:transcriptMode="normal">
 
             </ListView>
 

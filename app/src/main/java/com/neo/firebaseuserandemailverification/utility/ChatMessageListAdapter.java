@@ -16,6 +16,7 @@ import androidx.annotation.Nullable;
 
 import com.neo.firebaseuserandemailverification.R;
 import com.neo.firebaseuserandemailverification.models.ChatMessage;
+import com.nostra13.universalimageloader.core.ImageLoader;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -69,6 +70,7 @@ public class ChatMessageListAdapter extends ArrayAdapter<ChatMessage> {
             holder.message.setText(getItem(position).getMessage());
             if(!getItem(position).getProfile_image().equals("")){
                 Picasso.get().load(getItem(position).getProfile_image()).into(holder.mProfileImage);
+//                ImageLoader.getInstance().displayImage(getItem(position).getProfile_image(), holder.mProfileImage);
             }
             holder.name.setText(getItem(position).getName());
 

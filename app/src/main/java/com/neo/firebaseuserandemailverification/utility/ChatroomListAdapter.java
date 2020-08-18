@@ -26,6 +26,7 @@ import com.neo.firebaseuserandemailverification.ChatActivity;
 import com.neo.firebaseuserandemailverification.R;
 import com.neo.firebaseuserandemailverification.models.Chatroom;
 import com.neo.firebaseuserandemailverification.models.User;
+import com.nostra13.universalimageloader.core.ImageLoader;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -95,6 +96,7 @@ public class ChatroomListAdapter extends ArrayAdapter<Chatroom> {
                         String createdBy = "created by " + singleSnapshot.getValue(User.class).getName();
                         holder.creatorName.setText(createdBy);
                         Picasso.get().load(singleSnapshot.getValue(User.class).getProfile_image()).into(holder.mProfileImage);
+//                        ImageLoader.getInstance().displayImage(singleSnapshot.getValue(User.class).getProfile_image(), holder.mProfileImage);
                     }
                 }
 

@@ -7,7 +7,8 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/grey_border">
+        android:background="@drawable/grey_border"
+        android:id="@+id/layout_container">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -69,6 +70,20 @@
                 android:id="@+id/name"
                 android:layout_toLeftOf="@+id/number_chatmessages"
                 android:layout_alignParentLeft="true"/>
+
+            <Button
+                android:layout_width="60dp"
+                android:layout_height="25dp"
+                android:layout_below="@+id/name"
+                android:textSize="10sp"
+                android:text="leave"
+                android:background="@drawable/red_onclick_grey"
+                android:textColor="@color/White"
+                android:textStyle="bold"
+                android:layout_marginTop="5dp"
+                android:id="@+id/leave_chat"
+                android:layout_alignParentRight="true"
+                android:visibility="gone"/>
 
         </RelativeLayout>
 
