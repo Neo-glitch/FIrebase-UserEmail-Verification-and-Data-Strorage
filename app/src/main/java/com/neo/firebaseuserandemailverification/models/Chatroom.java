@@ -3,6 +3,8 @@ package com.neo.firebaseuserandemailverification.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.nostra13.universalimageloader.utils.L;
+
 import java.util.List;
 
 
@@ -14,24 +16,30 @@ public class Chatroom implements Parcelable{
     private String security_level;
     private String chatroom_id;
     private List<ChatMessage> chatroom_messages;
+    private List<String> users;
 
-    public Chatroom(String chatroom_name, String creator_id, String security_level, String chatroom_id, List<ChatMessage> chatroom_messages) {
+    public Chatroom(String chatroom_name, String creator_id, String security_level, String chatroom_id, List<ChatMessage> chatroom_messages, List<String> users) {
         this.chatroom_name = chatroom_name;
         this.creator_id = creator_id;
         this.security_level = security_level;
         this.chatroom_id = chatroom_id;
         this.chatroom_messages = chatroom_messages;
+        this.users = users;
     }
+
+
 
     public Chatroom() {
 
     }
+
 
     protected Chatroom(Parcel in) {
         chatroom_name = in.readString();
         creator_id = in.readString();
         security_level = in.readString();
         chatroom_id = in.readString();
+        users = in.createStringArrayList();
     }
 
     public static final Creator<Chatroom> CREATOR = new Creator<Chatroom>() {
@@ -86,6 +94,14 @@ public class Chatroom implements Parcelable{
         this.security_level = security_level;
     }
 
+    public List<String> getUsers() {
+        return users;
+    }
+
+    public void setUsers(List<String> users) {
+        this.users = users;
+    }
+
     @Override
     public String toString() {
         return "Chatroom{" +
@@ -94,8 +110,10 @@ public class Chatroom implements Parcelable{
                 ", security_level='" + security_level + '\'' +
                 ", chatroom_id='" + chatroom_id + '\'' +
                 ", chatroom_messages=" + chatroom_messages +
+                ", users=" + users +
                 '}';
     }
+
 
     @Override
     public int describeContents() {
@@ -103,10 +121,11 @@ public class Chatroom implements Parcelable{
     }
 
     @Override
-    public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeString(chatroom_name);
-        parcel.writeString(creator_id);
-        parcel.writeString(security_level);
-        parcel.writeString(chatroom_id);
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(chatroom_name);
+        dest.writeString(creator_id);
+        dest.writeString(security_level);
+        dest.writeString(chatroom_id);
+        dest.writeStringList(users);
     }
 }

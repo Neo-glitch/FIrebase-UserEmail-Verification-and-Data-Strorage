@@ -68,11 +68,10 @@ public class EmployeesAdapter extends RecyclerView.Adapter<EmployeesAdapter.View
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) throws NullPointerException{
-        if(!mUsers.get(position).getProfile_image().equals("")){       // make sure user has profile image before populating it
-//            ImageLoader.getInstance().displayImage(mUsers.get(position).getProfile_image(), holder.profileImage);
-            Picasso.get()
-                    .load(mUsers.get(position).getProfile_image())
-                    .into(holder.profileImage);
+
+        if(!mUsers.get(position).getProfile_image().equals("")) {
+            Picasso.get().load(mUsers.get(position).getProfile_image()).into(holder.profileImage);
+            //        ImageLoader.getInstance().displayImage(mUsers.get(position).getProfile_image(), holder.profileImage);
         }
         holder.name.setText(mUsers.get(position).getName());
         holder.department.setText(mUsers.get(position).getDepartment());

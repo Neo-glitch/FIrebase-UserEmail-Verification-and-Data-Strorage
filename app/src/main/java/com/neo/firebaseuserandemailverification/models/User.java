@@ -100,6 +100,8 @@ public class User {
                 ", profile_image='" + profile_image + '\'' +
                 ", security_level='" + security_level + '\'' +
                 ", user_id='" + user_id + '\'' +
+                ", messaging_token='" + messaging_token + '\'' +
+                ", department='" + department + '\'' +
                 '}';
     }
 }

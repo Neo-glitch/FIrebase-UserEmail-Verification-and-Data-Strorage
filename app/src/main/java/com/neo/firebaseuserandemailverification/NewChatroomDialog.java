@@ -1,6 +1,11 @@
 package com.neo.firebaseuserandemailverification;
 
 
+import android.app.Activity;
+import android.app.Dialog;
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -29,6 +34,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
+
+
 
 public class NewChatroomDialog extends DialogFragment {
 
@@ -61,10 +68,10 @@ public class NewChatroomDialog extends DialogFragment {
                     Log.d(TAG, "onClick: creating new chat room");
 
 
-                    if(mUserSecurityLevel >= mSeekBar.getProgress()){  // makes sure currentUser security level is greater than the seekBar pos
+                    if(mUserSecurityLevel >= mSeekBar.getProgress()){
 
                         DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
-                        //create and get the new chatroom unique id
+                        //get the new chatroom unique id
                         String chatroomId = reference
                                 .child(getString(R.string.dbnode_chatrooms))
                                 .push().getKey();
@@ -83,12 +90,12 @@ public class NewChatroomDialog extends DialogFragment {
                                 .child(chatroomId)
                                 .setValue(chatroom);
 
-                        //create a unique id for the message and get the key
+                        //create a unique id for the message
                         String messageId = reference
                                 .child(getString(R.string.dbnode_chatrooms))
                                 .push().getKey();
 
-                        //insert the first message(welcome message) into the chatroom
+                        //insert the first message into the chatroom
                         ChatMessage message = new ChatMessage();
 
                         message.setMessage("Welcome to the new chatroom!");
@@ -99,7 +106,7 @@ public class NewChatroomDialog extends DialogFragment {
                                 .child(getString(R.string.field_chatroom_messages))
                                 .child(messageId)
                                 .setValue(message);
-                        ((ChatActivity)getActivity()).init();           // refresh the lost of charRooms
+                        ((ChatActivity)getActivity()).getChatrooms();
                         getDialog().dismiss();
                     }else{
                         Toast.makeText(getActivity(), "insuffient security level", Toast.LENGTH_SHORT).show();
@@ -131,10 +138,6 @@ public class NewChatroomDialog extends DialogFragment {
         return view;
     }
 
-
-    /**
-     * gets currentUser security level
-     */
     private void getUserSecurityLevel(){
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
 
@@ -145,9 +148,8 @@ public class NewChatroomDialog extends DialogFragment {
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                // alt method of getting singleSnapShot is
-//                DataSnapshot singleSnapshot = dataSnapshot.getChildren().iterator().next();
-
+                //alternatively could have used:
+                //DataSnapshot singleSnapshot = dataSnapshot.getChildren().iterator().next();
                 for(DataSnapshot singleSnapshot:  dataSnapshot.getChildren()){
                     Log.d(TAG, "onDataChange: users security level: "
                             + singleSnapshot.getValue(User.class).getSecurity_level());

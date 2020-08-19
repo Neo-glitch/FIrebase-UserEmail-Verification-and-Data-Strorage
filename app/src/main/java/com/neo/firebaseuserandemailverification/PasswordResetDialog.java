@@ -1,6 +1,5 @@
 package com.neo.firebaseuserandemailverification;
 
-
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
@@ -18,6 +17,7 @@ import androidx.fragment.app.DialogFragment;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+
 
 public class PasswordResetDialog extends DialogFragment {
 

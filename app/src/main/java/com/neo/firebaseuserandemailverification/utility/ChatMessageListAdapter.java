@@ -1,6 +1,5 @@
 package com.neo.firebaseuserandemailverification.utility;
 
-
 import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -14,9 +13,18 @@ import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.neo.firebaseuserandemailverification.R;
 import com.neo.firebaseuserandemailverification.models.ChatMessage;
 import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.imageaware.ImageAware;
+import com.nostra13.universalimageloader.core.imageaware.ImageViewAware;
+import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -68,12 +76,21 @@ public class ChatMessageListAdapter extends ArrayAdapter<ChatMessage> {
         try{
             //set the message
             holder.message.setText(getItem(position).getMessage());
-            if(!getItem(position).getProfile_image().equals("")){
-                Picasso.get().load(getItem(position).getProfile_image()).into(holder.mProfileImage);
-//                ImageLoader.getInstance().displayImage(getItem(position).getProfile_image(), holder.mProfileImage);
-            }
+
+            //set the name
             holder.name.setText(getItem(position).getName());
 
+            //set the image (make sure to prevent the image 'flash')
+            if (holder.mProfileImage.getTag() == null ||
+                    !holder.mProfileImage.getTag().equals(getItem(position).getProfile_image())) {
+
+                //we only load image if prev. URL and current URL do not match, or tag is null and profile image not null
+                if(!getItem(position).getProfile_image().equals("")){
+                    Picasso.get().load(getItem(position).getProfile_image()).into(holder.mProfileImage);
+//                ImageLoader.getInstance().displayImage(getItem(position).getProfile_image(), holder.mProfileImage);
+                }
+                holder.mProfileImage.setTag(getItem(position).getProfile_image());
+            }
 
         }catch (NullPointerException e){
             Log.e(TAG, "getView: NullPointerException: ", e.getCause() );

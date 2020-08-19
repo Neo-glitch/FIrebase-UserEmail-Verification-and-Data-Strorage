@@ -22,6 +22,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
+import com.neo.firebaseuserandemailverification.models.Chatroom;
 import com.neo.firebaseuserandemailverification.models.User;
 import com.neo.firebaseuserandemailverification.utility.UniversalImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -41,7 +42,7 @@ public class SignedInActivity extends AppCompatActivity {
     // widgets and UI References
 
     //vars
-    public static boolean isActivityRunning;
+    public static boolean isActivityRunning;                                                        // tells if activity is running
     private Boolean mIsAdmin = false;
 
 
@@ -55,8 +56,25 @@ public class SignedInActivity extends AppCompatActivity {
         getUserDetails();
         initFCM();
         isAdmin();
+        getPendingIntent();
 //        initImageLoader();
+    }
 
+    /**
+     * retrieves intentExtras from the notification and pass to chatRoom activity, which is started
+     */
+    private void getPendingIntent(){
+        Log.d(TAG, "getPendingIntent: checking for pending intents");
+
+        Intent intent = getIntent();
+        if(intent.hasExtra(getString(R.string.intent_chatroom))){
+            Log.d(TAG, "getPendingIntent: pending intent detected");
+
+            Chatroom chatroom = intent.getParcelableExtra(getString(R.string.intent_chatroom));
+            Intent chatrroomIntent = new Intent(this, ChatroomActivity.class);
+            chatrroomIntent.putExtra(getString(R.string.intent_chatroom), chatroom);
+            startActivity(chatrroomIntent);
+        }
     }
 
     private void initFCM(){
@@ -235,6 +253,7 @@ public class SignedInActivity extends AppCompatActivity {
     public void onStart() {
         super.onStart();
         FirebaseAuth.getInstance().addAuthStateListener(mAuthListener);
+        isActivityRunning = true;
     }
 
     @Override
@@ -243,6 +262,7 @@ public class SignedInActivity extends AppCompatActivity {
         if (mAuthListener != null) {
             FirebaseAuth.getInstance().removeAuthStateListener(mAuthListener);
         }
+        isActivityRunning = false;
     }
 
 

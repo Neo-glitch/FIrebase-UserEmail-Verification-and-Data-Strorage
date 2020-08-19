@@ -17,6 +17,7 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
+
 public class ChangePhotoDialog extends DialogFragment {
 
     private static final String TAG = "ChangePhotoDialog";
@@ -36,7 +37,7 @@ public class ChangePhotoDialog extends DialogFragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.dialog_changephoto, container, false);
 
-        //Initialize the textView for choosing an image from memory
+        //Initialize the textview for choosing an image from memory
         TextView selectPhoto = (TextView) view.findViewById(R.id.dialogChoosePhoto);
         selectPhoto.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -48,7 +49,7 @@ public class ChangePhotoDialog extends DialogFragment {
             }
         });
 
-        //Initialize the textView for choosing an image from memory
+        //Initialize the textview for choosing an image from memory
         TextView takePhoto = (TextView) view.findViewById(R.id.dialogOpenCamera);
         takePhoto.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -58,6 +59,8 @@ public class ChangePhotoDialog extends DialogFragment {
                 startActivityForResult(cameraIntent, CAMERA_REQUEST_CODE);
             }
         });
+
+
         return view;
     }
 

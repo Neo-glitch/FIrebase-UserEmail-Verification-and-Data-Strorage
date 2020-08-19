@@ -35,8 +35,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
-
-
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -51,7 +49,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class AdminActivity extends AppCompatActivity {
 
     private static final String TAG = "AdminActivity";
-    private static final String BASE_URL = "https://fcm.googleapis.com/fcm/";               // base endPoint
+    private static final String BASE_URL = "https://fcm.googleapis.com/fcm/";
 
     //widgets
     private TextView mDepartments;
@@ -61,10 +59,10 @@ public class AdminActivity extends AppCompatActivity {
 
     //vars
     private ArrayList<String> mDepartmentsList;
-    private Set<String> mSelectedDepartments;                                               // list of dept selected
+    private Set<String> mSelectedDepartments;
     private EmployeesAdapter mEmployeeAdapter;
-    private ArrayList<User> mUsers;                                                         // list of user objects
-    private Set<String> mTokens;                                                            // list of tokens
+    private ArrayList<User> mUsers;
+    private Set<String> mTokens;
     private String mServerKey;
     public static boolean isActivityRunning;
 
@@ -181,16 +179,12 @@ public class AdminActivity extends AppCompatActivity {
         getServerKey();
     }
 
-    /**
-     * uses retrofit to send the post request thereby sending message to user in det
-     * specified by admin
-     */
     private void sendMessageToDepartment(String title, String message){
         Log.d(TAG, "sendMessageToDepartment: sending message to selected departments.");
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())                         // tells retrofit to convert request body to json data
+                .addConverterFactory(GsonConverterFactory.create())                                 // tells retrofit format to convert request java obj to
                 .build();
 
         //create the interface
@@ -201,7 +195,7 @@ public class AdminActivity extends AppCompatActivity {
         headers.put("Content-Type", "application/json");
         headers.put("Authorization", "key=" + mServerKey);
 
-        //send the message to all the tokens i.e tokens of users in specified dept
+        //send the message to all the tokens
         for(String token : mTokens){
 
             Log.d(TAG, "sendMessageToDepartment: sending to token: " + token);
@@ -260,7 +254,7 @@ public class AdminActivity extends AppCompatActivity {
 
 
     /**
-     * Get all the tokens of the users who are in the selected departments choosen by admin
+     * Get all the tokens of the users who are in the selected departments
      */
     private void getDepartmentTokens(){
         Log.d(TAG, "getDepartmentTokens: searching for tokens.");
@@ -270,7 +264,6 @@ public class AdminActivity extends AppCompatActivity {
         for(String department: mSelectedDepartments){
             Log.d(TAG, "getDepartmentTokens: department: " + department);
 
-            // gets department user object that has department equal to dept in focus
             Query query = reference.child(getString(R.string.dbnode_users))
                     .orderByChild(getString(R.string.field_department))
                     .equalTo(department);

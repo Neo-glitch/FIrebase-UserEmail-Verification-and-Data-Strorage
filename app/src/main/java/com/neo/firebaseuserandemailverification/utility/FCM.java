@@ -15,14 +15,11 @@ import retrofit2.http.POST;
  * Created by User on 10/26/2017.
  */
 
-/**
- * interface for retrofit, and for sending requests
- */
 public interface FCM {
 
-    @POST("send")           // "send" is end point
+    @POST("send")           // end point
     Call<ResponseBody> send(
-            @HeaderMap Map<String, String> headers,         // headers of request
-            @Body FirebaseCloudMessage message              // body of the post request
+            @HeaderMap Map<String, String> headers,                 // headers of request
+            @Body FirebaseCloudMessage message                      // body of request
     );
 }

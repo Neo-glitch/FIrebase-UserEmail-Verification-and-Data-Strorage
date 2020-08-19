@@ -56,36 +56,6 @@ public class SettingsActivity extends AppCompatActivity implements
         ChangePhotoDialog.OnPhotoReceivedListener {
     private static final String TAG = "SettingsActivity";
 
-    /////// OnPhotoReceivedListener dialog interface ////////
-    @Override
-    public void getImagePath(Uri imagePath) {     // if user gets image from disk
-        if (!imagePath.toString().equals("")) {
-            mSelectedImageBitmap = null;
-            mSelectedImageUri = imagePath;
-            Log.d(TAG, "getImagePath: got the image uri: " + mSelectedImageUri);
-            Picasso.get().load(mSelectedImageUri).into(mProfileImage);
-        }
-    }
-
-    @Override
-    public void getImageBitmap(Bitmap bitmap) {    // if user gets Image from camera
-        if (bitmap != null) {
-            mSelectedImageUri = null;
-            mSelectedImageBitmap = bitmap;
-            Log.d(TAG, "getImageBitmap: got the image bitmap: " + mSelectedImageBitmap);
-            mProfileImage.setImageBitmap(mSelectedImageBitmap);
-        }
-    }
-
-    ///////////////////////////////////////////////////////////////////////////
-
-
-    private static final String DOMAIN_NAME = "gmail.com";
-    private static final int REQUEST_CODE = 1234;
-    private static final double MB_THRESHHOLD = 5.0;
-    private static final double MB = 1000000.0;
-
-
     //firebase
     private FirebaseAuth.AuthStateListener mAuthListener;
 
@@ -97,11 +67,17 @@ public class SettingsActivity extends AppCompatActivity implements
     private TextView mResetPasswordLink;
 
     //vars
+    private static final String DOMAIN_NAME = "gmail.com";
+    private static final int REQUEST_CODE = 1234;
+    private static final double MB_THRESHHOLD = 5.0;
+    private static final double MB = 1000000.0;
     private boolean mStoragePermissions;                    // true if all the permissions needed by app are granted
     private Uri mSelectedImageUri;
     private Bitmap mSelectedImageBitmap;
     private byte[] mBytes;
     private double progress;
+    public static boolean isActivityRunning;
+
 
 
     @Override
@@ -124,6 +100,22 @@ public class SettingsActivity extends AppCompatActivity implements
         init();
         hideSoftKeyboard();
 
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        FirebaseAuth.getInstance().addAuthStateListener(mAuthListener);
+        isActivityRunning = true;
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (mAuthListener != null) {
+            FirebaseAuth.getInstance().removeAuthStateListener(mAuthListener);
+        }
+        isActivityRunning = false;
     }
 
 
@@ -694,6 +686,8 @@ public class SettingsActivity extends AppCompatActivity implements
         checkAuthenticationState();
     }
 
+
+
     private void checkAuthenticationState() {
         Log.d(TAG, "checkAuthenticationState: checking authentication state.");
 
@@ -742,20 +736,29 @@ public class SettingsActivity extends AppCompatActivity implements
 
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        FirebaseAuth.getInstance().addAuthStateListener(mAuthListener);
-    }
 
+    /////// OnPhotoReceivedListener dialog interface ////////
     @Override
-    public void onStop() {
-        super.onStop();
-        if (mAuthListener != null) {
-            FirebaseAuth.getInstance().removeAuthStateListener(mAuthListener);
+    public void getImagePath(Uri imagePath) {     // if user gets image from disk
+        if (!imagePath.toString().equals("")) {
+            mSelectedImageBitmap = null;
+            mSelectedImageUri = imagePath;
+            Log.d(TAG, "getImagePath: got the image uri: " + mSelectedImageUri);
+            Picasso.get().load(mSelectedImageUri).into(mProfileImage);
         }
     }
 
+    @Override
+    public void getImageBitmap(Bitmap bitmap) {    // if user gets Image from camera
+        if (bitmap != null) {
+            mSelectedImageUri = null;
+            mSelectedImageBitmap = bitmap;
+            Log.d(TAG, "getImageBitmap: got the image bitmap: " + mSelectedImageBitmap);
+            mProfileImage.setImageBitmap(mSelectedImageBitmap);
+        }
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
 
 }
 
