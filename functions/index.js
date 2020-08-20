@@ -69,7 +69,7 @@ exports.sendNotification = functions.database.ref('/chatrooms/{chatroomId}/chatr
 				//also check to see if the user_id we're viewing is the user who posted the message
 				//if it is, then save that name so we can pre-pend it to the message
 				let messageUserName = "";
-				if(snap.child('user_id').val() === messageUserId){
+				if(snap.child('user_id').val() == messageUserId){
 					messageUserName = snap.child('name').val();
 					console.log("message user name: " , messageUserName);
 					// e.g neo : hey there boy
@@ -77,7 +77,7 @@ exports.sendNotification = functions.database.ref('/chatrooms/{chatroomId}/chatr
 				}
 				
 				//Once the last user in the list has been added we can continue
-				if(i === length){          	// when iter through each user in chatroom.
+				if(i == length){          	// when iter through each user in chatroom.
 					
 					console.log("Construction the notification message.");
 					
