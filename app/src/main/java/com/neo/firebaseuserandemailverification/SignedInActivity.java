@@ -28,6 +28,9 @@ import com.neo.firebaseuserandemailverification.utility.UniversalImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.squareup.picasso.Picasso;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+
 
 /**
  * activity shown when user has been authenticated successfully
@@ -58,6 +61,10 @@ public class SignedInActivity extends AppCompatActivity {
         isAdmin();
         getPendingIntent();
 //        initImageLoader();
+
+        // to test crash
+//        ArrayList<String> test = null;
+//        test.size();
     }
 
     /**

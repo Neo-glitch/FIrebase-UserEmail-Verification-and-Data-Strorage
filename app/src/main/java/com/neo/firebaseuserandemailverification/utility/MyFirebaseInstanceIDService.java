@@ -13,7 +13,7 @@ import com.neo.firebaseuserandemailverification.R;
 /**
  * enables sending fcm to specific device using token
  */
-public class MyFirebaseInstanceIdService extends FirebaseInstanceIdService {
+class MyFirebaseInstanceIdService extends FirebaseInstanceIdService {
     private static final String TAG = "MyFirebaseInstanceIdSer";
 
     @Override
