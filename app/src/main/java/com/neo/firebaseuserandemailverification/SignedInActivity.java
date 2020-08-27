@@ -22,6 +22,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
+import com.neo.firebaseuserandemailverification.issues.IssuesActivity;
 import com.neo.firebaseuserandemailverification.models.Chatroom;
 import com.neo.firebaseuserandemailverification.models.User;
 import com.neo.firebaseuserandemailverification.utility.UniversalImageLoader;
@@ -78,12 +79,16 @@ public class SignedInActivity extends AppCompatActivity {
             Log.d(TAG, "getPendingIntent: pending intent detected");
 
             Chatroom chatroom = intent.getParcelableExtra(getString(R.string.intent_chatroom));
-            Intent chatrroomIntent = new Intent(this, ChatroomActivity.class);
-            chatrroomIntent.putExtra(getString(R.string.intent_chatroom), chatroom);
-            startActivity(chatrroomIntent);
+            Intent chatroomIntent = new Intent(this, ChatroomActivity.class);
+            chatroomIntent.putExtra(getString(R.string.intent_chatroom), chatroom);
+            startActivity(chatroomIntent);
         }
     }
 
+
+    /**
+     * gets device token for cloud messaging
+     */
     private void initFCM(){
         String token = FirebaseInstanceId.getInstance().getToken();
         Log.d(TAG, "initFCM: token: " + token);
@@ -216,6 +221,9 @@ public class SignedInActivity extends AppCompatActivity {
                 }else{
                     Toast.makeText(this, "You're not an Admin", Toast.LENGTH_SHORT).show();
                 }
+                return true;
+            case R.id.optionIssues:
+                startActivity(new Intent(SignedInActivity.this, IssuesActivity.class));
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
