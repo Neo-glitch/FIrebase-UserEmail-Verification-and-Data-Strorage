@@ -1,7 +1,7 @@
 package com.neo.firebaseuserandemailverification.issues;
 
 import android.content.Context;
-
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,25 +24,25 @@ import de.hdodenhof.circleimageview.CircleImageView;
  * Created by User on 4/16/2018.
  */
 
-public class ProjectsRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements
+public class ProjectsRecyclerViewAdapter extends SelectableAdapter<RecyclerView.ViewHolder> implements
         Filterable {
 
-    private ArrayList<Project> mProjects = new ArrayList<>();                                   // list holds list of queried projects
-
-    // to store list of filtered projects based on project name or description but default is same as project list
+    private ArrayList<Project> mProjects = new ArrayList<>();
     private ArrayList<Project> mFilteredProjects = new ArrayList<>();
     private Context mContext;
+    private RecyclerViewClickListener mRecyclerViewClickListener;
 
-    public ProjectsRecyclerViewAdapter(ArrayList<Project> projects, Context context) {
+    public ProjectsRecyclerViewAdapter(ArrayList<Project> projects, Context context, RecyclerViewClickListener recyclerViewClickListener) {
         mProjects = projects;
         mContext = context;
         mFilteredProjects = projects;
+        mRecyclerViewClickListener = recyclerViewClickListener;
     }
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(final ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_project_list_item, parent, false);
-        final ViewHolder holder = new ViewHolder(view);
+        final ViewHolder holder = new ViewHolder(view, mRecyclerViewClickListener);
 
 
         return holder;
@@ -65,6 +65,10 @@ public class ProjectsRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerVi
         ((ViewHolder)holder).name.setText(project.getName());
         ((ViewHolder)holder).created.setText(project.getTime_created().toString());
 
+        ((ViewHolder)holder).parentLayout.setBackgroundColor(
+                isSelected(position) ?
+                        mContext.getResources().getColor(R.color.transparentGrey) :
+                        Color.TRANSPARENT);
     }
 
     @Override
@@ -108,20 +112,49 @@ public class ProjectsRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerVi
         };
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder implements
+            View.OnClickListener,
+            View.OnLongClickListener{
 
         CircleImageView avatar;
         TextView name, created;
 
+        RecyclerViewClickListener listener;
+        LinearLayout parentLayout;
 
-        public ViewHolder(View itemView) {
+
+        public ViewHolder(View itemView, RecyclerViewClickListener listener) {
             super(itemView);
             avatar = itemView.findViewById(R.id.avatar);
             name = itemView.findViewById(R.id.project_name);
             created = itemView.findViewById(R.id.created);
+            parentLayout = itemView.findViewById(R.id.parent_layout);
 
+            this.listener = listener;
+
+            itemView.setOnClickListener(this);
+            itemView.setOnLongClickListener(this);
+        }
+        @Override
+        public void onClick(View v) {
+            if (listener != null) {
+                listener.onItemClicked(getAdapterPosition());
+            }
         }
 
+        @Override
+        public boolean onLongClick(View v) {
+            if (listener != null) {
+                return listener.onItemLongClicked(getAdapterPosition());
+            }
+
+            return false;
+        }
+    }
+
+    public interface RecyclerViewClickListener {
+        public void onItemClicked(int position);
+        public boolean onItemLongClicked(int position);
     }
 
 }

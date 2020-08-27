@@ -31,10 +31,10 @@ public class Issue implements Parcelable{
     private String description;
     private int priority; // "High" = 3, "Medium" = 2, "Low" = 1
     private String issue_type; // Task, Bug (Will have different icons so they're easily identified in list)
-    private @ServerTimestamp Date time_reported;
-    private String reporter;
+    private @ServerTimestamp Date time_reported;        // should not be changed when updating for our app
+    private String reporter;                            // should not be changed when updating for our app
     private String assignee;
-    private String issue_id;
+    private String issue_id;                            // should not be changed when updating for our app
     private String project_id;
     //attachments (list of string urls)
 

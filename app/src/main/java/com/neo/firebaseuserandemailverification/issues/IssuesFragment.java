@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -16,6 +18,9 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.view.ActionMode;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -23,11 +28,19 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.WriteBatch;
 import com.neo.firebaseuserandemailverification.R;
 import com.neo.firebaseuserandemailverification.models.Issue;
 import com.neo.firebaseuserandemailverification.models.Project;
@@ -42,7 +55,8 @@ import java.util.ArrayList;
 
 public class IssuesFragment extends Fragment implements
         View.OnClickListener,
-        SwipeRefreshLayout.OnRefreshListener
+        SwipeRefreshLayout.OnRefreshListener,
+        IssuesRecyclerViewAdapter.RecyclerViewClickListener
 {
 
     private static final String TAG = "IssuesFragment";
@@ -57,10 +71,12 @@ public class IssuesFragment extends Fragment implements
 
     //vars
     private IIssues mIIssues;
-    private ArrayList<Issue> mIssues = new ArrayList<>();                                           // list of issues to be passed to IssuesRV adapter
+    private ArrayList<Issue> mIssues = new ArrayList<>();
     private ArrayList<Project> mProjects = new ArrayList<>();
     private IssuesRecyclerViewAdapter mIssuesRecyclerViewAdapter;
     private Project mSelectedProject;
+    private ActionModeCallback mActionModeCallback = new ActionModeCallback();
+    public ActionMode mActionMode;                                           // needed for implementing marking operation
 
 
     @Nullable
@@ -98,14 +114,11 @@ public class IssuesFragment extends Fragment implements
 
     private void initRecyclerView(){
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        int[] icons = {R.drawable.ic_task_blue, R.drawable.red_bug};
-        mIssuesRecyclerViewAdapter = new IssuesRecyclerViewAdapter(getActivity(), mIssues, icons);
+        int[]  icons = {R.drawable.ic_task_blue, R.drawable.red_bug};
+        mIssuesRecyclerViewAdapter = new IssuesRecyclerViewAdapter(getActivity(), mIssues, icons, this);
         mRecyclerView.setAdapter(mIssuesRecyclerViewAdapter);
     }
 
-    /**
-     * init the project spinner and queries db for issues associated with project
-     */
     private void initProjectsSpinner(){
 
         String[] projects = new String[mProjects.size()];
@@ -120,7 +133,7 @@ public class IssuesFragment extends Fragment implements
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 mSelectedProject = mProjects.get(i);
-                getIssues();                            // queries db for issues collection
+                getIssues();
             }
 
             @Override
@@ -133,6 +146,7 @@ public class IssuesFragment extends Fragment implements
             mSelectedProject = mProjects.get(0);
         }
     }
+
 
     private void getIssues(){
         if(mSelectedProject != null){
@@ -148,9 +162,9 @@ public class IssuesFragment extends Fragment implements
             FirebaseFirestore db = FirebaseFirestore.getInstance();
 
             db.collection(getString(R.string.collection_projects))
-                    .document(mSelectedProject.getProject_id())                                         // project id or doc of project assoc with issue
+                    .document(mSelectedProject.getProject_id())
                     .collection(getString(R.string.collection_issues))
-                    .orderBy(getString(R.string.field_priority), Query.Direction.DESCENDING)    // the desc order makes issue with highest priority top of list
+                    .orderBy(getString(R.string.field_priority), Query.Direction.DESCENDING)
                     .get()
                     .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                         @Override
@@ -170,7 +184,6 @@ public class IssuesFragment extends Fragment implements
                         }
                     });
         }
-
     }
 
     private void getProjects(){
@@ -226,6 +239,186 @@ public class IssuesFragment extends Fragment implements
     private void onItemsLoadComplete(){
         mSwipeRefreshLayout.setRefreshing(false);
     }
+
+    @Override
+    public void onItemClicked(int position) {
+        if (mActionMode != null) {
+            toggleSelection(position);
+        }
+        else{
+            Intent intent = new Intent(getActivity(), IssueDetailsActivity.class);
+            intent.putExtra(getString(R.string.intent_issue), mIssues.get(position));
+            getActivity().startActivity(intent);
+        }
+    }
+
+    @Override
+    public boolean onItemLongClicked(int position) {
+        if (mActionMode == null){
+            mActionMode = ((AppCompatActivity)getActivity()).startSupportActionMode(mActionModeCallback);
+        }
+
+        toggleSelection(position);
+
+        return true;
+    }
+
+    private void deleteSelectedIssues(){
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        // batch obj for performing multiple writes i.e(create, update or del)
+        final WriteBatch batch = db.batch();
+
+        // list for holding marked Issue obj to delete
+        final ArrayList<Issue> deletedIssues = new ArrayList<>();
+
+        for(int i = 0; i < mIssues.size(); i++){
+            if(mIssuesRecyclerViewAdapter.isSelected(i)){           // loops through all issues in list and find the one where value is true(selected)
+
+                DocumentReference ref = db
+                        .collection(getString(R.string.collection_projects))
+                        .document(mIssues.get(i).getProject_id())
+                        .collection(getString(R.string.collection_issues))
+                        .document(mIssues.get(i).getIssue_id());
+
+                batch.delete(ref);
+
+                deletedIssues.add(mIssues.get(i));
+            }
+        }
+        mIssues.removeAll(deletedIssues);      // removes the deleted docs from issues local list after deleting from database collection
+        mIssuesRecyclerViewAdapter.notifyDataSetChanged();
+        executeBatchCommit(batch);
+    }
+
+
+    /**
+     * del issues assoc with selected fragment in project Fragment
+     */
+    public void deleteIssuesFromProject(ArrayList<Issue> issues, Project project){
+
+        // removes the issue from masterList(localList)
+        mIssues.removeAll(issues);
+        mIssuesRecyclerViewAdapter.notifyDataSetChanged();
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        final WriteBatch batch = db.batch();
+
+        for(int i = 0; i < issues.size(); i++){
+
+            DocumentReference ref = db
+                    .collection(getString(R.string.collection_projects))
+                    .document(project.getProject_id())
+                    .collection(getString(R.string.collection_issues))
+                    .document(issues.get(i).getIssue_id());
+            batch.delete(ref);
+
+            Log.d(TAG, "deleteIssuesFromProject: queueing up issue for delete: " + issues.get(i).getIssue_id());
+        }
+
+        executeBatchCommit(batch);
+
+        // delete the project
+        db.collection(getString(R.string.collection_projects))
+                .document(project.getProject_id())
+                .delete();
+
+        Log.d(TAG, "deleteIssuesFromProject: deleted project with id: " + project.getProject_id());
+    }
+
+
+    /**
+     * exec batch previously specified
+     */
+    private void executeBatchCommit(WriteBatch batch) {
+        batch.commit().addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    Log.d(TAG, "onComplete: deleted the selected issues.");
+                } else {
+                    Log.d(TAG, "onComplete: could not delete the selected issues.");
+                }
+            }
+        });
+    }
+
+
+    public void hideToolbar(){
+        if(mToolbar != null){
+            mToolbar.setVisibility(View.GONE);
+        }
+    }
+
+    public void showToolbar(){
+        if(mToolbar != null){
+            mToolbar.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void toggleSelection(int position) {
+        mIssuesRecyclerViewAdapter.toggleSelection(position);
+        int count = mIssuesRecyclerViewAdapter.getSelectedItemCount();
+
+        if (count == 0) {
+            showToolbar();
+            mActionMode.finish();
+        } else {
+            mActionMode.setTitle(String.valueOf(count));
+            mActionMode.invalidate();
+        }
+    }
+
+
+    ////////// class implementing ActionMode callback ////////
+    private class ActionModeCallback implements ActionMode.Callback {
+        @SuppressWarnings("unused")
+        private final String TAG = ActionModeCallback.class.getSimpleName();
+
+        @Override
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {             // inflates action mode toolbar with specified menu
+            mode.getMenuInflater().inflate (R.menu.selected_menu, menu);
+            hideToolbar();
+            return true;
+        }
+
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            return false;
+        }
+
+        @Override
+        public boolean onActionItemClicked(final ActionMode mode, MenuItem item) {          // when item in actionMode toolbar is clicked
+            switch (item.getItemId()) {
+                case R.id.menu_remove:
+                    new AlertDialog.Builder(getActivity())
+                            .setTitle("Delete")
+                            .setMessage("Do you really want to delete these Issues?")
+                            .setIcon(android.R.drawable.ic_delete)
+                            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int whichButton) {
+                                    Log.d(TAG, "menu_remove");
+                                    mode.finish();
+                                    deleteSelectedIssues();
+                                }})
+                            .setNegativeButton(android.R.string.no, null).show();
+
+                    return true;
+
+                default:
+                    return false;
+            }
+        }
+
+        @Override
+        public void onDestroyActionMode(ActionMode mode) {
+            mIssuesRecyclerViewAdapter.clearSelection();
+            mActionMode = null;
+            showToolbar();
+        }
+    }
+    //////// end ///////////////
 }
 
 

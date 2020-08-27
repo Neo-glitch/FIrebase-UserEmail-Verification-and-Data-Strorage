@@ -1,5 +1,8 @@
 package com.neo.firebaseuserandemailverification.issues;
 
+import com.neo.firebaseuserandemailverification.models.Issue;
+import com.neo.firebaseuserandemailverification.models.Project;
+
 import java.util.ArrayList;
 
 
@@ -16,5 +19,7 @@ public interface IIssues {
     void buildSnackbar(String message);
 
     void getProjects();
+
+    void deleteIssuesFromProject(ArrayList<Issue> issues, Project project);
 
 }

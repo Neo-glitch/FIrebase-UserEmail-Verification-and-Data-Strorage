@@ -3,10 +3,13 @@ package com.neo.firebaseuserandemailverification.issues;
 
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -14,6 +17,9 @@ import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.view.ActionMode;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
@@ -21,12 +27,22 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.neo.firebaseuserandemailverification.R;
+import com.neo.firebaseuserandemailverification.models.Issue;
 import com.neo.firebaseuserandemailverification.models.Project;
 import com.neo.firebaseuserandemailverification.utility.ResultCodes;
 
+import java.io.File;
 import java.util.ArrayList;
-
 
 
 /**
@@ -35,7 +51,8 @@ import java.util.ArrayList;
 
 public class ProjectsFragment extends Fragment implements
         View.OnClickListener,
-        SwipeRefreshLayout.OnRefreshListener
+        SwipeRefreshLayout.OnRefreshListener,
+        ProjectsRecyclerViewAdapter.RecyclerViewClickListener
 {
 
     private static final String TAG = "ProjectsFragment";
@@ -51,6 +68,8 @@ public class ProjectsFragment extends Fragment implements
     private ProjectsRecyclerViewAdapter mProjectsRecyclerViewAdapter;
     private ArrayList<Project> mProjects = new ArrayList<>();
     private IIssues mIIssues;
+    private ActionModeCallback mActionModeCallback = new ActionModeCallback();
+    public ActionMode mActionMode;
 
 
     @Nullable
@@ -93,13 +112,10 @@ public class ProjectsFragment extends Fragment implements
     }
 
     private void initRecyclerView(){
-        mProjectsRecyclerViewAdapter = new ProjectsRecyclerViewAdapter(mProjects, getActivity());
+        mProjectsRecyclerViewAdapter = new ProjectsRecyclerViewAdapter(mProjects, getActivity(), this);
         mRecyclerView.setAdapter(mProjectsRecyclerViewAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
     }
-
-
-
 
     private void initSearchView(){
         // Associate searchable configuration with the SearchView
@@ -172,6 +188,157 @@ public class ProjectsFragment extends Fragment implements
             mIIssues = (IIssues) getActivity();
         }catch (ClassCastException e){
             Log.e(TAG, "onAttach: Class Cast Exception: " + e.getMessage() );
+        }
+    }
+
+    private void deleteSelectedProjects(){
+
+        // list holding selected projects to delete
+        final ArrayList<Project> deletedProjects = new ArrayList<>();
+
+        for(int i = 0; i < mProjects.size(); i++){
+            if(mProjectsRecyclerViewAdapter.isSelected(i)){
+                Log.d(TAG, "deleteProjects: queueing up project for delete: " + mProjects.get(i).getProject_id());
+                deletedProjects.add(mProjects.get(i));
+            }
+        }
+
+        mProjects.removeAll(deletedProjects);                                       // removes projects from local list
+        mProjectsRecyclerViewAdapter.notifyDataSetChanged();
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        for(int i = 0; i < deletedProjects.size(); i++){
+
+            Log.d(TAG, "deleteProjects: deleting project with id: " + deletedProjects.get(i).getProject_id());
+
+            final Project project = deletedProjects.get(i);
+
+            // gets ref to issues collection associated with this project in focus
+            db.collection(getString(R.string.collection_projects))
+                    .document(project.getProject_id())
+                    .collection(getString(R.string.collection_issues))
+                    .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                    if(task.isSuccessful()){
+
+                        // list holding issue objects to del (issues associated with selected project)
+                        ArrayList<Issue> issues = new ArrayList<>();
+
+                        for(QueryDocumentSnapshot documentSnapshot : task.getResult()){
+                            // iters through each issue doc in the issue collections
+                            Log.d(TAG, "onComplete: adding issue to the list for deleting: " + documentSnapshot.getId());
+                            Issue issue = documentSnapshot.toObject(Issue.class);
+                            issues.add(issue);
+                        }
+
+                        // delete issues and attachments via IssuesFragment
+                        mIIssues.deleteIssuesFromProject(issues, project);
+                    }
+                    else{
+                        Log.d(TAG, "onComplete: error finding issues.");
+                    }
+                }
+            });
+        }
+    }
+
+
+    public void hideToolbar(){
+        if(mToolbar != null){
+            mToolbar.setVisibility(View.GONE);
+        }
+    }
+
+    public void showToolbar(){
+        if(mToolbar != null){
+            mToolbar.setVisibility(View.VISIBLE);
+        }
+    }
+
+    @Override
+    public void onItemClicked(int position) {
+        if (mActionMode != null) {
+            toggleSelection(position);
+        }
+        else{
+            Intent intent = new Intent(getActivity(), ProjectDetailsActivity.class);
+            intent.putExtra(getString(R.string.intent_project), mProjects.get(position));
+            getContext().startActivity(intent);
+        }
+
+    }
+
+    @Override
+    public boolean onItemLongClicked(int position) {
+        if (mActionMode == null){
+            mActionMode = ((AppCompatActivity)getActivity()).startSupportActionMode(mActionModeCallback);
+        }
+
+        toggleSelection(position);
+
+        return true;
+    }
+
+    private void toggleSelection(int position) {
+        mProjectsRecyclerViewAdapter.toggleSelection(position);
+        int count = mProjectsRecyclerViewAdapter.getSelectedItemCount();
+
+        if (count == 0) {
+            showToolbar();
+            mActionMode.finish();
+        } else {
+            mActionMode.setTitle(String.valueOf(count));
+            mActionMode.invalidate();
+        }
+    }
+
+    private class ActionModeCallback implements ActionMode.Callback {
+        @SuppressWarnings("unused")
+        private final String TAG = ActionModeCallback.class.getSimpleName();
+
+        @Override
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            mode.getMenuInflater().inflate (R.menu.selected_menu, menu);
+            hideToolbar();
+            return true;
+        }
+
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            return false;
+        }
+
+        @Override
+        public boolean onActionItemClicked(final ActionMode mode, MenuItem item) {
+            switch (item.getItemId()) {
+                case R.id.menu_remove:
+                    new AlertDialog.Builder(getActivity())
+                            .setTitle("Delete")
+                            .setMessage("Do you really want to delete these Projects?")
+                            .setIcon(android.R.drawable.ic_delete)
+                            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int whichButton) {
+                                    Log.d(TAG, "menu_remove");
+                                    mode.finish();
+                                    deleteSelectedProjects();
+                                }})
+                            .setNegativeButton(android.R.string.no, null).show();
+
+                    return true;
+
+                default:
+                    return false;
+            }
+        }
+
+        @Override
+        public void onDestroyActionMode(ActionMode mode) {
+            Log.d(TAG, "onDestroyActionMode: called.");
+            mProjectsRecyclerViewAdapter.clearSelection();
+            mActionMode = null;
+            showToolbar();
         }
     }
 }

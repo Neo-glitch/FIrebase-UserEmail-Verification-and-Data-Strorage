@@ -21,6 +21,7 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.neo.firebaseuserandemailverification.R;
+import com.neo.firebaseuserandemailverification.models.Issue;
 import com.neo.firebaseuserandemailverification.models.Project;
 
 import java.util.ArrayList;
@@ -157,6 +158,11 @@ public class IssuesActivity extends AppCompatActivity implements IIssues {
     @Override
     public void getProjects() {
         queryProjects();
+    }
+
+    @Override
+    public void deleteIssuesFromProject(ArrayList<Issue> issues, Project project) {
+        mIssuesFragment.deleteIssuesFromProject(issues, project);
     }
 }
 

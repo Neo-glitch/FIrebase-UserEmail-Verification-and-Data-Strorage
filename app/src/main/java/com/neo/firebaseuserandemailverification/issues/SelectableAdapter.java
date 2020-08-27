@@ -15,7 +15,7 @@ public abstract class SelectableAdapter<VH extends RecyclerView.ViewHolder> exte
     @SuppressWarnings("unused")
     private static final String TAG = SelectableAdapter.class.getSimpleName();
 
-    private SparseBooleanArray selectedItems;
+    private SparseBooleanArray selectedItems;                       // Bool Array where item of val true is the selected one
 
     public SelectableAdapter() {
         selectedItems = new SparseBooleanArray();
