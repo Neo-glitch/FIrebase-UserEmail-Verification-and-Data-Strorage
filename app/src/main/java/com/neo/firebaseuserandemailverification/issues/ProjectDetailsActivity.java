@@ -3,6 +3,7 @@ package com.neo.firebaseuserandemailverification.issues;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -17,12 +18,15 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.neo.firebaseuserandemailverification.ChangePhotoDialog;
 import com.neo.firebaseuserandemailverification.R;
 import com.neo.firebaseuserandemailverification.models.Project;
 
@@ -35,9 +39,11 @@ import de.hdodenhof.circleimageview.CircleImageView;
  */
 
 public class ProjectDetailsActivity extends AppCompatActivity implements
-        View.OnClickListener {
+        View.OnClickListener,
+        ChangePhotoDialog.OnPhotoReceivedListener {
 
     private static final String TAG = "ProjectDetailsActivity";
+    private static final int REQUEST_CODE = 1234;
 
     //widgets
     private CircleImageView mAvatar;
@@ -48,6 +54,7 @@ public class ProjectDetailsActivity extends AppCompatActivity implements
     //vars
     private Project mProject;
     private Uri mSelectedImageUri;
+    private boolean mStoragePermissions;
 
 
     @Override
@@ -66,6 +73,7 @@ public class ProjectDetailsActivity extends AppCompatActivity implements
         getSelectedProject();
         setupActionBar();
         setProjectDetails();
+        verifyStoragePermissions();
     }
 
 
@@ -153,11 +161,18 @@ public class ProjectDetailsActivity extends AppCompatActivity implements
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.avatar: {
-
+                if(mStoragePermissions){
+                    ChangePhotoDialog dialog = new ChangePhotoDialog();
+                    dialog.show(getSupportFragmentManager(), getString(R.string.dialog_change_photo));
+                }else{
+                    verifyStoragePermissions();
+                }
                 break;
             }
 
             case R.id.btn_save: {
+                IssuesPhotoUploader uploader = new IssuesPhotoUploader(this, mProject.getProject_id(), "", null);
+                uploader.uploadNewPhoto(mSelectedImageUri);
                 updateProject();
                 break;
             }
@@ -196,6 +211,51 @@ public class ProjectDetailsActivity extends AppCompatActivity implements
         }
     }
 
+    /**
+     * Generalized method for asking permission. Can pass any array of permissions
+     */
+    public void verifyStoragePermissions(){
+        Log.d(TAG, "verifyPermissions: asking user for permissions.");
+        String[] permissions = {Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.CAMERA};
+        if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
+                permissions[0] ) == PackageManager.PERMISSION_GRANTED
+                && ContextCompat.checkSelfPermission(this.getApplicationContext(),
+                permissions[1] ) == PackageManager.PERMISSION_GRANTED
+                && ContextCompat.checkSelfPermission(this.getApplicationContext(),
+                permissions[2] ) == PackageManager.PERMISSION_GRANTED) {
+            mStoragePermissions = true;
+        } else {
+            ActivityCompat.requestPermissions(
+                    ProjectDetailsActivity.this,
+                    permissions,
+                    REQUEST_CODE
+            );
+        }
+    }
+
+    @Override
+    public void getImagePath(Uri imagePath) {
+        if( !imagePath.toString().equals("")){
+            mSelectedImageUri = imagePath;
+            Log.d(TAG, "getImagePath: got the image uri: " + mSelectedImageUri);
+
+            RequestOptions requestOptions = new RequestOptions()
+                    .placeholder(R.drawable.default_avatar);
+
+            Glide.with(this)
+                    .load(imagePath)
+                    .apply(requestOptions)
+                    .into(mAvatar);
+
+        }
+    }
+
+    @Override
+    public void getImageBitmap(Bitmap bitmap) {
+
+    }
 }
 
 

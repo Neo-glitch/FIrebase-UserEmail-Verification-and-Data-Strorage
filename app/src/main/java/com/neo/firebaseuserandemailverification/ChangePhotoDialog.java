@@ -25,6 +25,8 @@ public class ChangePhotoDialog extends DialogFragment {
     public static final int  CAMERA_REQUEST_CODE = 5467;//random number
     public static final int PICKFILE_REQUEST_CODE = 8352;//random number
 
+
+    // interface to send photoUri to activity or fragment using this DialogFrag
     public interface OnPhotoReceivedListener{
         public void getImagePath(Uri imagePath);
         public void getImageBitmap(Bitmap bitmap);

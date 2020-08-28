@@ -39,6 +39,7 @@ import com.google.firebase.storage.StorageReference;
 import com.neo.firebaseuserandemailverification.R;
 import com.neo.firebaseuserandemailverification.models.Issue;
 import com.neo.firebaseuserandemailverification.models.Project;
+import com.neo.firebaseuserandemailverification.utility.FilePaths;
 import com.neo.firebaseuserandemailverification.utility.ResultCodes;
 
 import java.io.File;
@@ -243,6 +244,39 @@ public class ProjectsFragment extends Fragment implements
             });
         }
     }
+
+
+    /**
+     * delete image assoc with this project
+     */
+    private void deleteProjectAvatarFromStorage(Project project){
+
+        if(!project.getAvatar().equals("")){
+            FirebaseStorage storage = FirebaseStorage.getInstance();
+
+            StorageReference storageRef = storage.getReference();
+
+            FilePaths filePaths = new FilePaths();
+            StorageReference filePathRef = storageRef.child(filePaths.FIREBASE_PROJECT_IMAGE_STORAGE
+                    + File.separator + project.getProject_id()
+                    + File.separator + "project_avatar");
+
+            Log.d(TAG, "deleteProjectAvatarFromStorage: removing from storage: " + filePathRef);
+
+            filePathRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    Log.d(TAG, "onSuccess: SUCCESSFULLY deleted file: project_avatar");
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+                    Log.d(TAG, "onSuccess: FAILED to delete file: project_avatar");
+                }
+            });
+        }
+    }
+
 
 
     public void hideToolbar(){

@@ -41,11 +41,15 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.WriteBatch;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.neo.firebaseuserandemailverification.R;
 import com.neo.firebaseuserandemailverification.models.Issue;
 import com.neo.firebaseuserandemailverification.models.Project;
+import com.neo.firebaseuserandemailverification.utility.FilePaths;
 import com.neo.firebaseuserandemailverification.utility.ResultCodes;
 
+import java.io.File;
 import java.util.ArrayList;
 
 
@@ -56,8 +60,7 @@ import java.util.ArrayList;
 public class IssuesFragment extends Fragment implements
         View.OnClickListener,
         SwipeRefreshLayout.OnRefreshListener,
-        IssuesRecyclerViewAdapter.RecyclerViewClickListener
-{
+        IssuesRecyclerViewAdapter.RecyclerViewClickListener {
 
     private static final String TAG = "IssuesFragment";
 
@@ -97,32 +100,32 @@ public class IssuesFragment extends Fragment implements
         return view;
     }
 
-    public void updateProjectsList(ArrayList<Project> projects){
+    public void updateProjectsList(ArrayList<Project> projects) {
 
-        if(mProjects != null){
-            if(mProjects.size() > 0){
+        if (mProjects != null) {
+            if (mProjects.size() > 0) {
                 mProjects.clear();
             }
         }
 
-        if(projects != null){
+        if (projects != null) {
             mProjects.addAll(projects);
             initProjectsSpinner();
             initRecyclerView();
         }
     }
 
-    private void initRecyclerView(){
+    private void initRecyclerView() {
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        int[]  icons = {R.drawable.ic_task_blue, R.drawable.red_bug};
+        int[] icons = {R.drawable.ic_task_blue, R.drawable.red_bug};
         mIssuesRecyclerViewAdapter = new IssuesRecyclerViewAdapter(getActivity(), mIssues, icons, this);
         mRecyclerView.setAdapter(mIssuesRecyclerViewAdapter);
     }
 
-    private void initProjectsSpinner(){
+    private void initProjectsSpinner() {
 
         String[] projects = new String[mProjects.size()];
-        for(int i = 0; i < mProjects.size(); i++){
+        for (int i = 0; i < mProjects.size(); i++) {
             projects[i] = mProjects.get(i).getName();
         }
 
@@ -142,19 +145,19 @@ public class IssuesFragment extends Fragment implements
             }
         });
 
-        if(mProjects.size() > 0){
+        if (mProjects.size() > 0) {
             mSelectedProject = mProjects.get(0);
         }
     }
 
 
-    private void getIssues(){
-        if(mSelectedProject != null){
+    private void getIssues() {
+        if (mSelectedProject != null) {
 
             mIIssues.showProgressBar();
 
-            if(mIssues != null){
-                if(mIssues.size() > 0){
+            if (mIssues != null) {
+                if (mIssues.size() > 0) {
                     mIssues.clear();
                 }
             }
@@ -169,13 +172,12 @@ public class IssuesFragment extends Fragment implements
                     .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                         @Override
                         public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                            if(task.isSuccessful()){
-                                for(QueryDocumentSnapshot documentSnapshot: task.getResult()){
+                            if (task.isSuccessful()) {
+                                for (QueryDocumentSnapshot documentSnapshot : task.getResult()) {
                                     Issue issue = documentSnapshot.toObject(Issue.class);
                                     mIssues.add(issue);
                                 }
-                            }
-                            else{
+                            } else {
                                 Toast.makeText(getActivity(), "error getting issues for that project", Toast.LENGTH_SHORT).show();
                                 Log.d(TAG, "onComplete: errors getting issues for project id: " + mSelectedProject.getProject_id());
                             }
@@ -186,15 +188,15 @@ public class IssuesFragment extends Fragment implements
         }
     }
 
-    private void getProjects(){
+    private void getProjects() {
         mIIssues.getProjects();
     }
 
     @Override
     public void onClick(View view) {
-        switch (view.getId()){
+        switch (view.getId()) {
 
-            case R.id.add_new:{
+            case R.id.add_new: {
                 //go to NewIssueActivity
                 Intent intent = new Intent(getActivity(), NewIssueActivity.class);
                 startActivityForResult(intent, ResultCodes.SNACKBAR_RESULT_CODE);
@@ -206,9 +208,9 @@ public class IssuesFragment extends Fragment implements
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        try{
+        try {
             mIIssues = (IIssues) getActivity();
-        }catch (ClassCastException e){
+        } catch (ClassCastException e) {
             e.printStackTrace();
         }
     }
@@ -216,7 +218,7 @@ public class IssuesFragment extends Fragment implements
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-        if(resultCode == ResultCodes.SNACKBAR_RESULT_CODE){
+        if (resultCode == ResultCodes.SNACKBAR_RESULT_CODE) {
             Log.d(TAG, "onActivityResult: building snackbar message.");
             String message = data.getStringExtra(getString(R.string.intent_snackbar_message));
             mIIssues.buildSnackbar(message);
@@ -236,7 +238,7 @@ public class IssuesFragment extends Fragment implements
         onItemsLoadComplete();
     }
 
-    private void onItemsLoadComplete(){
+    private void onItemsLoadComplete() {
         mSwipeRefreshLayout.setRefreshing(false);
     }
 
@@ -244,8 +246,7 @@ public class IssuesFragment extends Fragment implements
     public void onItemClicked(int position) {
         if (mActionMode != null) {
             toggleSelection(position);
-        }
-        else{
+        } else {
             Intent intent = new Intent(getActivity(), IssueDetailsActivity.class);
             intent.putExtra(getString(R.string.intent_issue), mIssues.get(position));
             getActivity().startActivity(intent);
@@ -254,8 +255,8 @@ public class IssuesFragment extends Fragment implements
 
     @Override
     public boolean onItemLongClicked(int position) {
-        if (mActionMode == null){
-            mActionMode = ((AppCompatActivity)getActivity()).startSupportActionMode(mActionModeCallback);
+        if (mActionMode == null) {
+            mActionMode = ((AppCompatActivity) getActivity()).startSupportActionMode(mActionModeCallback);
         }
 
         toggleSelection(position);
@@ -263,7 +264,7 @@ public class IssuesFragment extends Fragment implements
         return true;
     }
 
-    private void deleteSelectedIssues(){
+    private void deleteSelectedIssues() {
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
@@ -273,8 +274,8 @@ public class IssuesFragment extends Fragment implements
         // list for holding marked Issue obj to delete
         final ArrayList<Issue> deletedIssues = new ArrayList<>();
 
-        for(int i = 0; i < mIssues.size(); i++){
-            if(mIssuesRecyclerViewAdapter.isSelected(i)){           // loops through all issues in list and find the one where value is true(selected)
+        for (int i = 0; i < mIssues.size(); i++) {
+            if (mIssuesRecyclerViewAdapter.isSelected(i)) {           // loops through all issues in list and find the one where value is true(selected)
 
                 DocumentReference ref = db
                         .collection(getString(R.string.collection_projects))
@@ -287,16 +288,132 @@ public class IssuesFragment extends Fragment implements
                 deletedIssues.add(mIssues.get(i));
             }
         }
-        mIssues.removeAll(deletedIssues);      // removes the deleted docs from issues local list after deleting from database collection
+        deleteAttachments(deletedIssues, batch, null);
+    }
+
+    public void deleteAttachments(final ArrayList<Issue> deletedIssues, final WriteBatch batch, final Project project) {
+
+        Log.d(TAG, "deleteAttachments: deleting issues and attachments.");
+
+        // removes selected issues(deleted issues) from the issues list popping rv
+        mIssues.removeAll(deletedIssues);
         mIssuesRecyclerViewAdapter.notifyDataSetChanged();
-        executeBatchCommit(batch);
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        if (deletedIssues.size() > 0) {
+            for (int i = 0; i < deletedIssues.size(); i++) {
+
+                Log.d(TAG, "deleteAttachments: deleting issue with id: " + deletedIssues.get(i).getIssue_id());
+
+                final Issue issue = deletedIssues.get(i);
+
+                final int index = i;
+
+                db.collection(getString(R.string.collection_projects))
+                        .document(issue.getProject_id())
+                        .collection(getString(R.string.collection_issues))
+                        .document(issue.getIssue_id())
+                        .collection(getString(R.string.collection_attachments))
+                        .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot documentSnapshot : task.getResult()) {
+
+                                Log.d(TAG, "onComplete: deleting attachment with id: " + documentSnapshot.getId());
+
+                                Attachment attachment = documentSnapshot.toObject(Attachment.class);
+
+                                // Get the url
+                                final String url = attachment.getUrl();
+
+                                // Get the attachment name
+                                int startingIndex = url.indexOf(issue.getIssue_id()) + issue.getIssue_id().length() + 3;
+                                int endingIndex = url.indexOf("?");
+                                final String attachmentFileName = url.substring(startingIndex, endingIndex);
+                                Log.d(TAG, "removeAttachments: attachment name: " + attachmentFileName);
+
+                                deleteAttachmentDocument(issue, documentSnapshot.getId(), attachmentFileName);
+                            }
+
+                            // make sure all attachments are deleted before deleting issue hosting the attachment
+                            if (index == deletedIssues.size() - 1) {
+                                if (batch == null) {                // case for project since this method is reusable in project fragment since no batch is passed
+                                    Log.d(TAG, "deleteAttachments: batch is NULL.");
+                                    deleteIssuesFromProject(deletedIssues, project);
+                                } else {
+                                    executeBatchCommit(batch);
+                                }
+                            }
+                        } else {
+                            Log.d(TAG, "onComplete: error finding attachment.");
+                        }
+                    }
+                });
+            }
+        } else {                    // run only if no issues in a project
+            if (batch == null) {     // for case of project deletion, where it has no issues and hence to attachments
+                Log.d(TAG, "deleteAttachments: batch is NULL.");
+                deleteIssuesFromProject(deletedIssues, project);
+            } else {
+                executeBatchCommit(batch);
+            }
+        }
+    }
+
+    private void deleteAttachmentDocument(final Issue issue, final String attachmentId, final String attachmentFileName) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        db.collection(getString(R.string.collection_projects))
+                .document(issue.getProject_id())
+                .collection(getString(R.string.collection_issues))
+                .document(issue.getIssue_id())
+                .collection(getString(R.string.collection_attachments))
+                .document(attachmentId)
+                .delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    Log.d(TAG, "onComplete: deleted attachment: " + attachmentId);
+                    deleteAttachmentFromStorage(issue, attachmentFileName);
+                } else {
+                    Log.d(TAG, "onComplete: failed to delete attachment: " + attachmentId);
+                }
+            }
+        });
+    }
+
+    private void deleteAttachmentFromStorage(final Issue issue, final String filename) {
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+
+        StorageReference storageRef = storage.getReference();
+
+        FilePaths filePaths = new FilePaths();
+        StorageReference filePathRef = storageRef.child(filePaths.FIREBASE_ISSUE_IMAGE_STORAGE
+                + File.separator + issue.getIssue_id()
+                + File.separator + filename);
+
+        Log.d(TAG, "deleteAttachmentFromStorage: removing from storage: " + filePathRef);
+
+        filePathRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                Log.d(TAG, "onSuccess: SUCCESSFULLY deleted file: " + filename);
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                Log.d(TAG, "onSuccess: FAILED to delete file: " + filename);
+            }
+        });
     }
 
 
     /**
      * del issues assoc with selected fragment in project Fragment
      */
-    public void deleteIssuesFromProject(ArrayList<Issue> issues, Project project){
+    public void deleteIssuesFromProject(ArrayList<Issue> issues, Project project) {
 
         // removes the issue from masterList(localList)
         mIssues.removeAll(issues);
@@ -305,7 +422,7 @@ public class IssuesFragment extends Fragment implements
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         final WriteBatch batch = db.batch();
 
-        for(int i = 0; i < issues.size(); i++){
+        for (int i = 0; i < issues.size(); i++) {
 
             DocumentReference ref = db
                     .collection(getString(R.string.collection_projects))
@@ -345,14 +462,14 @@ public class IssuesFragment extends Fragment implements
     }
 
 
-    public void hideToolbar(){
-        if(mToolbar != null){
+    public void hideToolbar() {
+        if (mToolbar != null) {
             mToolbar.setVisibility(View.GONE);
         }
     }
 
-    public void showToolbar(){
-        if(mToolbar != null){
+    public void showToolbar() {
+        if (mToolbar != null) {
             mToolbar.setVisibility(View.VISIBLE);
         }
     }
@@ -378,7 +495,7 @@ public class IssuesFragment extends Fragment implements
 
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {             // inflates action mode toolbar with specified menu
-            mode.getMenuInflater().inflate (R.menu.selected_menu, menu);
+            mode.getMenuInflater().inflate(R.menu.selected_menu, menu);
             hideToolbar();
             return true;
         }
@@ -401,7 +518,8 @@ public class IssuesFragment extends Fragment implements
                                     Log.d(TAG, "menu_remove");
                                     mode.finish();
                                     deleteSelectedIssues();
-                                }})
+                                }
+                            })
                             .setNegativeButton(android.R.string.no, null).show();
 
                     return true;

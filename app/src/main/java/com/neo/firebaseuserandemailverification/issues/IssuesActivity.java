@@ -162,7 +162,7 @@ public class IssuesActivity extends AppCompatActivity implements IIssues {
 
     @Override
     public void deleteIssuesFromProject(ArrayList<Issue> issues, Project project) {
-        mIssuesFragment.deleteIssuesFromProject(issues, project);
+        mIssuesFragment.deleteAttachments(issues, null,  project);
     }
 }
 
