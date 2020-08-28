@@ -40,6 +40,13 @@
         <activity android:name=".ChatActivity"/>
         <activity android:name=".ChatroomActivity"/>
         <activity android:name=".AdminActivity"/>
+
+        <!-- just added  -->
+        <activity android:name=".issues.IssuesActivity" android:windowSoftInputMode="adjustPan"/>
+        <activity android:name=".issues.NewProjectActivity"/>
+        <activity android:name=".issues.NewIssueActivity"/>
+        <activity android:name=".issues.ProjectDetailsActivity"/>
+        <activity android:name=".issues.IssueDetailsActivity"/>
     </application>
 
 </manifest>
