@@ -59,7 +59,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         initImageLoader();
 
         String identifyDataType = remoteMessage.getData().get(getString(R.string.data_type));
-        //SITUATION: Application is in foreground then only send priority notificaitons such as an admin notification
+        //SITUATION: Application is in foreground then only send priority notifications such as an admin notification
         if (isApplicationInForeground()) {
             if (identifyDataType.equals(getString(R.string.data_type_admin_broadcast))) {
                 //build admin broadcast notification
@@ -75,14 +75,12 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 //build admin broadcast notification
                 String title = remoteMessage.getData().get(getString(R.string.data_title));
                 String message = remoteMessage.getData().get(getString(R.string.data_message));
-
-
                 sendBroadcastNotification(title, message);
             } else if (identifyDataType.equals(getString(R.string.data_type_chat_message))) {
                 //build chat message notification and figure out how many chat msg has been posted since last user session in chat room
                 final String title = remoteMessage.getData().get(getString(R.string.data_title));
                 final String message = remoteMessage.getData().get(getString(R.string.data_message));
-                final String chatroomId = remoteMessage.getData().get(getString(R.string.data_chatroom_id));
+                final String chatroomId = remoteMessage.getData().get(getString(R.string.data_chatroom_id));  // needed to get chatRoom msg was posted in
 
                 //logic is that when user enters room, we take sum of msg there and post to db in chatroom/ users/ uid node as last_message_seen = "1"
                 //and now to get msg users has not seen and pass to notification we now get the last_seen_msg and subtract from total number of msgs

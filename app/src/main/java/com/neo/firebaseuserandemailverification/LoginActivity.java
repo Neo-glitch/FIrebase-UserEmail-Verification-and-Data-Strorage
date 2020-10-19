@@ -35,7 +35,7 @@ public class LoginActivity extends AppCompatActivity {
     private static final int ERROR_DIALOG_REQUEST = 9001;
 
     //Firebase
-    private FirebaseAuth.AuthStateListener mAuthListener;
+    private FirebaseAuth.AuthStateListener mAuthListener;     // listener to receive authentication state(authenticated or not)
 
     // widgets
     private EditText mEmail, mPassword;
@@ -71,15 +71,12 @@ public class LoginActivity extends AppCompatActivity {
                     Log.d(TAG, "onClick: attempting to authenticate.");
 
                     showDialog();
-
                     FirebaseAuth.getInstance().signInWithEmailAndPassword(mEmail.getText().toString(),
                             mPassword.getText().toString())
                             .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                                 @Override
                                 public void onComplete(@NonNull Task<AuthResult> task) {
-
                                     hideDialog();
-
                                 }
                             }).addOnFailureListener(new OnFailureListener() {
                         @Override
@@ -189,7 +186,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
-                if (user != null) {
+                if (user != null) {  // user has been authenticated
 
                     //check if email is verified
                     if(user.isEmailVerified()){

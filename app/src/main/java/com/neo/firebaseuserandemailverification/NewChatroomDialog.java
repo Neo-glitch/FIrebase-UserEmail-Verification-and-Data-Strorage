@@ -71,7 +71,7 @@ public class NewChatroomDialog extends DialogFragment {
                     if(mUserSecurityLevel >= mSeekBar.getProgress()){
 
                         DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
-                        //get the new chatroom unique id
+                        //get the new chatroom unique id typeCasted as str
                         String chatroomId = reference
                                 .child(getString(R.string.dbnode_chatrooms))
                                 .push().getKey();
@@ -148,7 +148,7 @@ public class NewChatroomDialog extends DialogFragment {
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                //alternatively could have used:
+                //alternatively could have used since only one result is derived:
                 //DataSnapshot singleSnapshot = dataSnapshot.getChildren().iterator().next();
                 for(DataSnapshot singleSnapshot:  dataSnapshot.getChildren()){
                     Log.d(TAG, "onDataChange: users security level: "

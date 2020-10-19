@@ -184,6 +184,7 @@ public class SignedInActivity extends AppCompatActivity {
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
+        // checks auth state and if user not authenticated, takes them back to LoginActivity
         if(user == null){
             Log.d(TAG, "checkAuthenticationState: user is null, navigating back to login screen.");
             Intent intent = new Intent(SignedInActivity.this, LoginActivity.class);
@@ -248,10 +249,9 @@ public class SignedInActivity extends AppCompatActivity {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
+                // checks to see if user is authenticated, else go back to loginActivity
                 if (user != null) {
-
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
-
                 } else {
                     Log.d(TAG, "onAuthStateChanged:signed_out");
                     Intent intent = new Intent(SignedInActivity.this, LoginActivity.class);

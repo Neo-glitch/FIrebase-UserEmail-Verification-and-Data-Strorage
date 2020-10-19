@@ -17,7 +17,7 @@ class MyFirebaseInstanceIdService extends FirebaseInstanceIdService {
     private static final String TAG = "MyFirebaseInstanceIdSer";
 
     @Override
-    public void onTokenRefresh() {       // gets token
+    public void onTokenRefresh() {       // gets device token
         String refreshedToken = FirebaseInstanceId.getInstance().getToken();
         Log.d(TAG, "onTokenRefresh: refresh token : " + refreshedToken);
 

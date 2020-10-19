@@ -282,7 +282,6 @@ public class SettingsActivity extends AppCompatActivity implements
                 }
             }
 
-
             // compression logic
             byte[] bytes = null;
             for (int i = 1; i < 11; i++) {     // ran 10 times since max quality of bitmap is 100% and each loop drops quality by 10 =%
@@ -291,6 +290,7 @@ public class SettingsActivity extends AppCompatActivity implements
                     break;
                 }
                 bytes = getBytesFromBitmap(mBitmap, 100 / i);
+                Log.d(TAG, "doInBackground: in bytes" + bytes.length);
                 Log.d(TAG, "doInBackground: megabytes: (" + (11 - i) + "0%) " + bytes.length / MB + " MB");
                 if (bytes.length / MB < MB_THRESHHOLD) {
                     return bytes;
@@ -315,12 +315,13 @@ public class SettingsActivity extends AppCompatActivity implements
      * convert from bitmap to byte array and also compress it
      *
      * @param bitmap
-     * @param quality = % quality remaining of the original photo
+     * @param quality: % quality to be left after compression e.g if 50% passed then quality of image to remain after compresion
+     *               should be 50%
      * @return
      */
     public static byte[] getBytesFromBitmap(Bitmap bitmap, int quality) {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, quality, stream);
+        bitmap.compress(Bitmap.CompressFormat.JPEG, quality, stream);   // does the compression
         return stream.toByteArray();
     }
 
@@ -379,10 +380,10 @@ public class SettingsActivity extends AppCompatActivity implements
                 }
             }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
                 @Override
-                public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {  // call to give update as progress goes in
                     // logic decreases frequency of progress update since it shows too frequently
                     double currentProgress = (100 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
-                    if (currentProgress > (progress + 10)) {
+                    if (currentProgress > (progress + 10)) {  // true when progress increases by 10%
                         progress = (100 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
                         Log.d(TAG, "onProgress: Upload is " + progress + "% done");
                         Toast.makeText(SettingsActivity.this, progress + "%", Toast.LENGTH_SHORT).show();
@@ -407,7 +408,7 @@ public class SettingsActivity extends AppCompatActivity implements
         query1.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                //this loop will return a single result
+                //this loop will return a single result(since only a single child of this snapshot)
                 for (DataSnapshot singleSnapshot : dataSnapshot.getChildren()) {
                     Log.d(TAG, "onDataChange: (QUERY METHOD 1) found user: "
                             + singleSnapshot.getValue(User.class).toString());
@@ -424,14 +425,14 @@ public class SettingsActivity extends AppCompatActivity implements
             }
         });
 
-        // query method 2
+        // query method 2. order db query result by field(user_id) and get where that field is == currentUserId
         Query query2 = reference.child(getString(R.string.dbnode_users))
                 .orderByChild(getString(R.string.field_user_id))
                 .equalTo(FirebaseAuth.getInstance().getCurrentUser().getUid());
         query2.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                //this loop will return a single result
+                //this loop will return a single result(since only a single child of this snapshot)
                 for (DataSnapshot singleSnapshot : dataSnapshot.getChildren()) {
                     Log.d(TAG, "onDataChange: (QUERY METHOD 2) found user: "
                             + singleSnapshot.getValue(User.class).toString());
@@ -508,14 +509,12 @@ public class SettingsActivity extends AppCompatActivity implements
         // Get auth credentials from the user for re-authentication. The example below shows
         // email and password credentials but there are multiple possible providers,
         // such as GoogleAuthProvider or FacebookAuthProvider.
-
         showDialog();
 
         AuthCredential credential = EmailAuthProvider
                 .getCredential(FirebaseAuth.getInstance().getCurrentUser().getEmail(), mCurrentPassword.getText().toString());
         Log.d(TAG, "editUserEmail: reauthenticating with:  \n email " + FirebaseAuth.getInstance().getCurrentUser().getEmail()
                 + " \n passowrd: " + mCurrentPassword.getText().toString());
-
 
         FirebaseAuth.getInstance().getCurrentUser().reauthenticate(credential)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {

@@ -48,7 +48,7 @@ public class ChatActivity extends AppCompatActivity {
     private FloatingActionButton mFob;
 
     //vars
-    private ArrayList<Chatroom> mChatrooms;
+    private ArrayList<Chatroom> mChatrooms;    // list to be passed to ChatRoomListAdapter
     private ChatroomListAdapter mAdapter;
     private int mSecurityLevel;
     private DatabaseReference mChatroomReference;
@@ -168,6 +168,7 @@ public class ChatActivity extends AppCompatActivity {
                             Chatroom chatroom = new Chatroom();
                             Map<String, Object> objectMap = (HashMap<String, Object>) singleSnapshot.getValue();
 
+                            // done this way since there's a presence of a list node(i.e chatroom_messages)
                             Log.d(TAG, "onDataChange: found a chatroom: "
                                     + objectMap.get(getString(R.string.field_chatroom_name)).toString());
                             chatroom.setChatroom_id(objectMap.get(getString(R.string.field_chatroom_id)).toString());
@@ -181,7 +182,7 @@ public class ChatActivity extends AppCompatActivity {
     //                    chatroom.setCreator_id(singleSnapshot.getValue(Chatroom.class).getCreator_id());
     //                    chatroom.setChatroom_name(singleSnapshot.getValue(Chatroom.class).getChatroom_name());
 
-                            //get the chatrooms messages
+                            //get the info from chatRooms messages list
                             ArrayList<ChatMessage> messagesList = new ArrayList<ChatMessage>();
                             int numMessages = 0;
                             for(DataSnapshot snapshot: singleSnapshot

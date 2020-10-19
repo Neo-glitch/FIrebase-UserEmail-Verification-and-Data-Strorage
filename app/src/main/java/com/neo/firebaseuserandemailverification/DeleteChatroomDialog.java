@@ -25,7 +25,7 @@ public class DeleteChatroomDialog extends DialogFragment {
         setArguments(new Bundle());
     }
 
-    private String mChatroomId;
+    private String mChatroomId;   // chatRoom id of chat to be deleted
 
 
     @Override

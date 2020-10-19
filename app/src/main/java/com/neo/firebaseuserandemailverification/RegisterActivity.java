@@ -92,7 +92,6 @@ public class RegisterActivity extends AppCompatActivity {
      * @param password
      */
     public void registerNewEmail(final String email, String password){
-
         showDialog();
 
         FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
@@ -216,7 +215,6 @@ public class RegisterActivity extends AppCompatActivity {
 
     private void showDialog(){
         mProgressBar.setVisibility(View.VISIBLE);
-
     }
 
     private void hideDialog(){

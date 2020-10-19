@@ -178,7 +178,7 @@ public class ChatroomActivity extends AppCompatActivity {
                             Log.d(TAG, "onDataChange: adding a new message to the list: " + snapshot.getKey());
                             //add the message id to the message set
                             mMessageIdSet.add(snapshot.getKey());
-                            if(userId != null){ //check and make sure it's not the first message (has no user id)
+                            if(userId != null){  //check and make sure it's not the first message (first has no user id)
                                 message.setMessage(snapshot.getValue(ChatMessage.class).getMessage());
                                 message.setUser_id(snapshot.getValue(ChatMessage.class).getUser_id());
                                 message.setTimestamp(snapshot.getValue(ChatMessage.class).getTimestamp());
@@ -215,6 +215,8 @@ public class ChatroomActivity extends AppCompatActivity {
     private void getUserDetails(){
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
         for(int i = 0; i < mMessagesList.size(); i++) {
+            // iterates through all messages obj in messagesList and find user Id attached to that message
+            // then we use the user id to query fb db users node, for the user's name and the profile_url
            // Log.d(TAG, "onDataChange: searching for userId: " + mMessagesList.get(i).getUser_id());
             final int j = i;
             if(mMessagesList.get(i).getUser_id() != null && mMessagesList.get(i).getProfile_image().equals("")){

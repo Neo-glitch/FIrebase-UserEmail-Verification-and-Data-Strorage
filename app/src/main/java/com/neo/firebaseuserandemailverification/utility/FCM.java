@@ -11,10 +11,10 @@ import retrofit2.http.Body;
 import retrofit2.http.HeaderMap;
 import retrofit2.http.POST;
 
-/**
- * Created by User on 10/26/2017.
- */
 
+/**
+ * Interface used by retrofit to make post requests to firebase to trigger cloud Messaging
+ */
 public interface FCM {
 
     @POST("send")           // end point

@@ -77,7 +77,7 @@ public class ResendVerificationDialog extends DialogFragment {
 
 
     /**
-     * reauthenticate so we can send a verification email again
+     * temp reauthenticate so we can send a verification email again
      * @param email
      * @param password
      */

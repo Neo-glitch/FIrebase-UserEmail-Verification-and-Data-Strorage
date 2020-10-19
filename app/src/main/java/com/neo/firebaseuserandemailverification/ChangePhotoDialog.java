@@ -81,9 +81,7 @@ public class ChangePhotoDialog extends DialogFragment {
             mOnPhotoReceived.getImagePath(selectedImageUri);
             getDialog().dismiss();
 
-        }
-
-        else if(requestCode == CAMERA_REQUEST_CODE && resultCode == Activity.RESULT_OK){
+        } else if(requestCode == CAMERA_REQUEST_CODE && resultCode == Activity.RESULT_OK){
             Log.d(TAG, "onActivityResult: done taking a photo.");
 
             Bitmap bitmap;

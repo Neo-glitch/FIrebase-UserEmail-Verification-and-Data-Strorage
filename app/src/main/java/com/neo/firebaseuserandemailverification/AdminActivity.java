@@ -42,10 +42,10 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-/**
- * Created by User on 10/25/2017.
- */
 
+/**
+ * Activity where an admin(user with security level of 10), can send fcm to employees in a departments
+ */
 public class AdminActivity extends AppCompatActivity {
 
     private static final String TAG = "AdminActivity";
@@ -195,7 +195,7 @@ public class AdminActivity extends AppCompatActivity {
         headers.put("Content-Type", "application/json");
         headers.put("Authorization", "key=" + mServerKey);
 
-        //send the message to all the tokens
+        //send the message to all the tokens, by looping thorough each token in mTokens and send same cloud message
         for(String token : mTokens){
 
             Log.d(TAG, "sendMessageToDepartment: sending to token: " + token);
@@ -213,7 +213,6 @@ public class AdminActivity extends AppCompatActivity {
                 @Override
                 public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                     Log.d(TAG, "onResponse: Server Response: "  + response.toString());
-
                 }
 
                 @Override
@@ -264,6 +263,7 @@ public class AdminActivity extends AppCompatActivity {
         for(String department: mSelectedDepartments){
             Log.d(TAG, "getDepartmentTokens: department: " + department);
 
+            // gets query of users node dat has department field == department in focus and get the messaging(fcm) token
             Query query = reference.child(getString(R.string.dbnode_users))
                     .orderByChild(getString(R.string.field_department))
                     .equalTo(department);
