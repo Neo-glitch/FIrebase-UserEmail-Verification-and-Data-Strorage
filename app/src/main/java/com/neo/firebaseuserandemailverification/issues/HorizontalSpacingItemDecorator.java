@@ -8,7 +8,6 @@ import androidx.recyclerview.widget.RecyclerView;
 /**
  * class that helps in spacing horizontal rvView list items
  */
-
 public class HorizontalSpacingItemDecorator extends RecyclerView.ItemDecoration {
 
     private final int horizontalSpacing;

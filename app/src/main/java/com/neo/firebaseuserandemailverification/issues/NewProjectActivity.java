@@ -29,9 +29,8 @@ import com.neo.firebaseuserandemailverification.utility.ResultCodes;
 
 
 /**
- * Created by User on 4/16/2018.
+ * Activity used to create a new Project # creating a new project doc in fireStore
  */
-
 public class NewProjectActivity extends AppCompatActivity implements
         View.OnClickListener
 {

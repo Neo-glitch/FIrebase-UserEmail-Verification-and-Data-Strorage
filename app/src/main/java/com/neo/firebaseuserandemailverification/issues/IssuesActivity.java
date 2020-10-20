@@ -26,10 +26,12 @@ import com.neo.firebaseuserandemailverification.models.Project;
 
 import java.util.ArrayList;
 
-/**
- * Created by User on 4/16/2018.
- */
 
+/**
+ * Activity with ViewPager hosting the Issues and Project Fragment
+ * and responsible for querying list of projects and issues assoc with a project and pass to
+ * needed fragments
+ */
 public class IssuesActivity extends AppCompatActivity implements IIssues {
 
     private static final String TAG = "IssuesActivity";

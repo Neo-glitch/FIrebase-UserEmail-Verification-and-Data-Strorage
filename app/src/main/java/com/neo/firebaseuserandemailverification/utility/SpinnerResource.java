@@ -4,13 +4,9 @@ package com.neo.firebaseuserandemailverification.utility;
 import com.neo.firebaseuserandemailverification.R;
 import com.neo.firebaseuserandemailverification.models.Issue;
 
-/**
- * Created by User on 4/17/2018.
- */
-
 
 /**
- * holds all the spinner values to be used in spinner View i.e (all texts and drawables)
+ * holds all the spinner values to be used in spinner Views i.e (all texts and drawables)
  */
 public class SpinnerResource {
 

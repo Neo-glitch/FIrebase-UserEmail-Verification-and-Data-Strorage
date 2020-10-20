@@ -18,9 +18,8 @@ import java.util.ArrayList;
 
 
 /**
- * Horizontal Rv adapter class for rv in issueDetails Activity
+ * Horizontal Rv adapter class for Attachments rv in issueDetails Activity
  */
-
 public class AttachmentRecyclerViewAdapter extends SelectableAdapter<RecyclerView.ViewHolder> {
 
 

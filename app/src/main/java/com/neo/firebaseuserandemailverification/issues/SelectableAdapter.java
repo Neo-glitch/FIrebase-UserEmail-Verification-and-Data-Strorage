@@ -8,9 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by User on 4/25/2018.
+ * class used to record highlighted selected items from an adapter
  */
-
 public abstract class SelectableAdapter<VH extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<VH> {
     @SuppressWarnings("unused")
     private static final String TAG = SelectableAdapter.class.getSimpleName();

@@ -34,10 +34,10 @@ import java.util.HashMap;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-/**
- * Created by User on 4/16/2018.
- */
 
+/**
+ * shows details about a project when it's selected from Projects fragment and allows editing of project
+ */
 public class ProjectDetailsActivity extends AppCompatActivity implements
         View.OnClickListener,
         ChangePhotoDialog.OnPhotoReceivedListener {
@@ -78,7 +78,7 @@ public class ProjectDetailsActivity extends AppCompatActivity implements
 
 
     /**
-     * updates activity widgets with prop from property obj recieved
+     * updates activity widgets with prop from property obj received
      */
     private void setProjectDetails() {
         RequestOptions requestOptions = new RequestOptions()

@@ -151,6 +151,10 @@ public class IssuesFragment extends Fragment implements
     }
 
 
+    /**
+     * gets issues associated with a project selected from the spinner once project is selected
+     * and update the issue rv
+     */
     private void getIssues() {
         if (mSelectedProject != null) {
 
@@ -265,9 +269,7 @@ public class IssuesFragment extends Fragment implements
     }
 
     private void deleteSelectedIssues() {
-
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-
         // batch obj for performing multiple writes i.e(create, update or del)
         final WriteBatch batch = db.batch();
 
@@ -284,7 +286,6 @@ public class IssuesFragment extends Fragment implements
                         .document(mIssues.get(i).getIssue_id());
 
                 batch.delete(ref);
-
                 deletedIssues.add(mIssues.get(i));
             }
         }
@@ -300,16 +301,14 @@ public class IssuesFragment extends Fragment implements
         mIssuesRecyclerViewAdapter.notifyDataSetChanged();
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-
         if (deletedIssues.size() > 0) {
             for (int i = 0; i < deletedIssues.size(); i++) {
 
                 Log.d(TAG, "deleteAttachments: deleting issue with id: " + deletedIssues.get(i).getIssue_id());
-
                 final Issue issue = deletedIssues.get(i);
-
                 final int index = i;
 
+                // gets attachment in the issue and del it from firestore and cloud storage
                 db.collection(getString(R.string.collection_projects))
                         .document(issue.getProject_id())
                         .collection(getString(R.string.collection_issues))
@@ -336,13 +335,12 @@ public class IssuesFragment extends Fragment implements
 
                                 deleteAttachmentDocument(issue, documentSnapshot.getId(), attachmentFileName);
                             }
-
                             // make sure all attachments are deleted before deleting issue hosting the attachment
                             if (index == deletedIssues.size() - 1) {
                                 if (batch == null) {                // case for project since this method is reusable in project fragment since no batch is passed
                                     Log.d(TAG, "deleteAttachments: batch is NULL.");
                                     deleteIssuesFromProject(deletedIssues, project);
-                                } else {
+                                } else {   // case for issue, so del issue
                                     executeBatchCommit(batch);
                                 }
                             }
@@ -352,7 +350,7 @@ public class IssuesFragment extends Fragment implements
                     }
                 });
             }
-        } else {                    // run only if no issues in a project
+        } else {                     // run only if no issues in a project
             if (batch == null) {     // for case of project deletion, where it has no issues and hence to attachments
                 Log.d(TAG, "deleteAttachments: batch is NULL.");
                 deleteIssuesFromProject(deletedIssues, project);
@@ -411,7 +409,7 @@ public class IssuesFragment extends Fragment implements
 
 
     /**
-     * del issues assoc with selected fragment in project Fragment
+     * del issues assoc with selected project and call fun to del the project to
      */
     public void deleteIssuesFromProject(ArrayList<Issue> issues, Project project) {
 
@@ -446,7 +444,7 @@ public class IssuesFragment extends Fragment implements
 
 
     /**
-     * exec batch previously specified
+     * exec batch previously specified to run needed work
      */
     private void executeBatchCommit(WriteBatch batch) {
         batch.commit().addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -530,7 +528,7 @@ public class IssuesFragment extends Fragment implements
         }
 
         @Override
-        public void onDestroyActionMode(ActionMode mode) {
+        public void onDestroyActionMode(ActionMode mode) {   // called when backArrow is pressed or .finish() is called
             mIssuesRecyclerViewAdapter.clearSelection();
             mActionMode = null;
             showToolbar();

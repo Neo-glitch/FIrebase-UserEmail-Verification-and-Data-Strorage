@@ -68,9 +68,8 @@ import java.util.List;
 
 
 /**
- * Created by User on 4/23/2018.
+ * activity that allows editing of an issue selected from IssuesFragment
  */
-
 public class IssueDetailsActivity extends AppCompatActivity implements
         View.OnClickListener,
         IIssueDetail,
@@ -137,7 +136,7 @@ public class IssueDetailsActivity extends AppCompatActivity implements
     }
 
     /**
-     * gets selected issue from intent used to start yhe activity
+     * gets selected issue from intent used to start the activity
      */
     private boolean getIssue() {
         if (getIntent().hasExtra(getString(R.string.intent_issue))) {
@@ -148,6 +147,9 @@ public class IssueDetailsActivity extends AppCompatActivity implements
         return false;
     }
 
+    /**
+     * gets attachments associated with an issue
+     */
     private void getAttachments(){
         // get the document reference
         FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -201,7 +203,6 @@ public class IssueDetailsActivity extends AppCompatActivity implements
 
             // get the document reference
             FirebaseFirestore db = FirebaseFirestore.getInstance();
-
             DocumentReference newIssueRef = db
                     .collection(getString(R.string.collection_projects))
                     .document(mIssue.getProject_id())
@@ -321,7 +322,7 @@ public class IssueDetailsActivity extends AppCompatActivity implements
 
 
     /**
-     * Get a list of all employees
+     * Get a list of all employees from firebase database
      *
      * @throws NullPointerException
      */
@@ -588,7 +589,6 @@ public class IssueDetailsActivity extends AppCompatActivity implements
             uploader.uploadAttachment(imagePath);
             mAttachments.add(imagePath.toString());
             mAttachmentRecyclerViewAdapter.notifyDataSetChanged();
-
         }
     }
 
@@ -614,7 +614,7 @@ public class IssueDetailsActivity extends AppCompatActivity implements
      */
     @Override
     public void isSelected(boolean isSelected) {
-        if(isSelected){
+        if(isSelected){  // true
             removeAttachmentsMode();
         }
         else{
@@ -637,13 +637,11 @@ public class IssueDetailsActivity extends AppCompatActivity implements
      * queries db and get attachment needed, then call del method to del attachment
      */
     private void removeAttachments(){
-        // get the attachments that are selected, from rv holding the attachment images and store in list
+        // get the attachments that are selected, from rv holding the attachment images and store in a list
         List<Integer> selectedAttachments = mAttachmentRecyclerViewAdapter.getSelectedItems();
-
 
         // iterate through and delete all attachment in list from fireStore and cloudStorage
         for(int i : selectedAttachments){
-
             if(!mAttachments.get(i).contains("useemail-auth-and-verification")){                          //makes sure user not del attachment not uploaded yet, i.e to ensure uri is from firebase and not device
                 buildSnackbar("One of the images you selected is still uploading");
             }
@@ -720,7 +718,6 @@ public class IssueDetailsActivity extends AppCompatActivity implements
 
     private void deleteAttachmentFromStorage(final String filename){
         FirebaseStorage storage = FirebaseStorage.getInstance();
-
         StorageReference storageRef = storage.getReference();
 
         FilePaths filePaths = new FilePaths();

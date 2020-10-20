@@ -41,7 +41,7 @@ import java.util.HashMap;
 public class IssuesPhotoUploader {
 
     /**
-     * interface for communicating within fragment or fragment that starts upload process
+     * interface for communicating within fragment or activity that starts upload process when upload is complete
      */
     public interface AttachmentUploadCallback {
         void updateImageUrl(String downloadUrl, String localImagePath);
@@ -95,7 +95,7 @@ public class IssuesPhotoUploader {
             mConvert.cancel(true);
         }
         mConvert = new BackgroundConversion();
-        mConvert.execute(imageUri);
+        mConvert.execute(imageUri);   // starts background process for converting image res to byte array
     }
 
 
@@ -145,6 +145,9 @@ public class IssuesPhotoUploader {
         }
     }
 
+    /**
+     * starts the upload process to firebase cloud Storage
+     */
     private void executeUploadTask() {
         FilePaths filePaths = new FilePaths();
         //specify where the photo will be stored
@@ -251,6 +254,9 @@ public class IssuesPhotoUploader {
                 });
     }
 
+    /**
+     * updates the project doc that has this project Id with the url of the avatar or image
+     */
     private void updateProjectAvatar(String downloadUrl) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 

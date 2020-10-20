@@ -47,9 +47,8 @@ import java.util.ArrayList;
 
 
 /**
- * Created by User on 4/16/2018.
+ * Fragments holding lists of projects # list of project docs
  */
-
 public class ProjectsFragment extends Fragment implements
         View.OnClickListener,
         SwipeRefreshLayout.OnRefreshListener,
@@ -118,6 +117,10 @@ public class ProjectsFragment extends Fragment implements
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
     }
 
+
+    /**
+     * sets up the searchView
+     */
     private void initSearchView(){
         // Associate searchable configuration with the SearchView
         SearchManager searchManager = (SearchManager) getActivity().getSystemService(Context.SEARCH_SERVICE);
@@ -197,7 +200,7 @@ public class ProjectsFragment extends Fragment implements
         // list holding selected projects to delete
         final ArrayList<Project> deletedProjects = new ArrayList<>();
 
-        for(int i = 0; i < mProjects.size(); i++){
+        for(int i = 0; i < mProjects.size(); i++){    // gets all projects selected by user to delete
             if(mProjectsRecyclerViewAdapter.isSelected(i)){
                 Log.d(TAG, "deleteProjects: queueing up project for delete: " + mProjects.get(i).getProject_id());
                 deletedProjects.add(mProjects.get(i));
@@ -209,8 +212,8 @@ public class ProjectsFragment extends Fragment implements
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
+        // loops through selected projects, queries them for their issues and delete the issues
         for(int i = 0; i < deletedProjects.size(); i++){
-
             Log.d(TAG, "deleteProjects: deleting project with id: " + deletedProjects.get(i).getProject_id());
 
             final Project project = deletedProjects.get(i);
@@ -236,6 +239,7 @@ public class ProjectsFragment extends Fragment implements
 
                         // delete issues and attachments via IssuesFragment
                         mIIssues.deleteIssuesFromProject(issues, project);
+                        deleteProjectAvatarFromStorage(project);
                     }
                     else{
                         Log.d(TAG, "onComplete: error finding issues.");
@@ -247,7 +251,7 @@ public class ProjectsFragment extends Fragment implements
 
 
     /**
-     * delete image assoc with this project
+     * delete image assoc with this project from firebase cloud Storage
      */
     private void deleteProjectAvatarFromStorage(Project project){
 

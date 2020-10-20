@@ -9,7 +9,7 @@ import com.google.firebase.firestore.ServerTimestamp;
 import java.util.Date;
 
 /**
- * project obj class and used sets fields of each project doc
+ * project obj class and used to set fields of each project doc
  * and the class annotation allows class fields not here to be ignored when querying project
  * obj from the cloud fireStore db
  */
@@ -19,7 +19,7 @@ public class Project implements Parcelable {
     private String name;
     private String description;
     private String creator;
-    private @ServerTimestamp Date time_created;                     // done this way to auto add timestamp in db if null is passed as val
+    private @ServerTimestamp Date time_created;                     // done this way to auto add timestamp in db, if null is passed as val
     private String avatar;
     private String project_id;
 

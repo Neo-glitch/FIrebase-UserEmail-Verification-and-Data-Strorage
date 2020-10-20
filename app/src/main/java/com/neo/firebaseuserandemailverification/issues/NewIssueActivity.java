@@ -47,9 +47,8 @@ import java.util.ArrayList;
 
 
 /**
- * Created by User on 4/17/2018.
+ * Activity used to create a new Issue doc
  */
-
 public class NewIssueActivity extends AppCompatActivity implements
         View.OnClickListener,
         View.OnTouchListener {
@@ -96,13 +95,11 @@ public class NewIssueActivity extends AppCompatActivity implements
     }
 
     /**
-     * queries needed fireStore and get list of project to be associated with autoComplete tv
+     * queries needed fireStore collection and get list of project to be associated with autoComplete tv
      */
     private void initProjectAutoCompleteTextView() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-
         CollectionReference projectsRef = db.collection(getString(R.string.collection_projects));
-
 
         // does querying of collectionRef and get needed values(docs)
         projectsRef
@@ -113,7 +110,7 @@ public class NewIssueActivity extends AppCompatActivity implements
                         if (task.isSuccessful()) {
                             Log.d(TAG, "onComplete: got projects");
                             int i = 0;
-                            String[] projects = new String[task.getResult().size()];
+                            String[] projects = new String[task.getResult().size()];    // array used for autoComplete tv
                             for (QueryDocumentSnapshot document : task.getResult()) {   // gets each doc in doc list or collection
                                 Project project = document.toObject(Project.class);
                                 mProjects.add(project);
@@ -214,6 +211,9 @@ public class NewIssueActivity extends AppCompatActivity implements
     }
 
 
+    /**
+     * fun used to create a new issue doc in the issues collection associated with a project
+     */
     private void createNewIssue() {
 
         hideSoftKeyboard();
@@ -225,7 +225,7 @@ public class NewIssueActivity extends AppCompatActivity implements
         } else {
             showProgressBar();
 
-//             Find the Project id, by checking if project assigned matches one of projects docs in db and get the project id of project
+            // Find the Project id, by checking if project assigned matches one of projects docs in db and get the project id of project
             String temp = "";
             for (Project project : mProjects) {
                 if (project.getName().equals(mAssignToProject.getText().toString())) {
@@ -242,7 +242,6 @@ public class NewIssueActivity extends AppCompatActivity implements
             } else {
                 // get the document reference
                 FirebaseFirestore db = FirebaseFirestore.getInstance();
-
                 DocumentReference newIssueRef = db
                         .collection(getString(R.string.collection_projects))
                         .document(projectId)
@@ -252,7 +251,7 @@ public class NewIssueActivity extends AppCompatActivity implements
                 // Get user id of issue reporter or creator
                 String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-                // Create a new id for the issue
+                // Create a new id for the issue doc
                 final String issueId = newIssueRef.getId();
 
                 // Create the issue and add send to database

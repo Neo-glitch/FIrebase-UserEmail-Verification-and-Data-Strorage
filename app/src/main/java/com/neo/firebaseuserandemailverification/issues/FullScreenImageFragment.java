@@ -24,7 +24,6 @@ import com.neo.firebaseuserandemailverification.R;
 /**
  * fragment to hold the scalable and draggable ImageView
  */
-
 public class FullScreenImageFragment extends Fragment
 {
 

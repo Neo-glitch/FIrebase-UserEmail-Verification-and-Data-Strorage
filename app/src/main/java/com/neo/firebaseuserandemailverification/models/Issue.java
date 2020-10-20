@@ -59,7 +59,7 @@ public class Issue implements Parcelable{
 
 
     /**
-     * auto called by firebase firestore to get priority in string and store the value retrieved in the db
+     * auto inserted by fireStore, even if no PriorityString field was created # fireStore just add this since it's a getter fun()
      * so to not include this field getter just add annotation @exclude
      */
     public String getPriorityString(){
