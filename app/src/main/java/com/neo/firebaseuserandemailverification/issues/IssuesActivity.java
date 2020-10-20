@@ -153,7 +153,7 @@ public class IssuesActivity extends AppCompatActivity implements IIssues {
 
     @Override
     public void buildSnackbar(String message) {
-        Snackbar.make(getCurrentFocus().getRootView(), message, Snackbar.LENGTH_LONG).show();
+        Snackbar.make(mViewPager, message, Snackbar.LENGTH_LONG).show();
     }
 
 
