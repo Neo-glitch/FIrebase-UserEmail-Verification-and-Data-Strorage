@@ -103,7 +103,6 @@ public class SignedInActivity extends AppCompatActivity {
         Log.d(TAG, "sendRegistrationToServer: sending token to server: " + refreshedToken);
 
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
-
         reference.child(getString(R.string.dbnode_users))
                 .child(FirebaseAuth.getInstance().getCurrentUser().getUid())
                 .child(getString(R.string.field_messaging_token))                       // field to store the token
